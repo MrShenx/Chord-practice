@@ -2207,6 +2207,372 @@
     return silBuf;
   }
 
+  // ============================================================
+  //  Hand-authored pixel-art monsters (procedural primitives)
+  //  Each PXDRAW[id](P, t) paints on an integer cell grid via P.* helpers;
+  //  blitMonster() renders those cells as chunky squares in the framebuffer.
+  // ============================================================
+  function makePixCtx(ctx2d, footX, footY, gridW, gridH, D, opts){
+    opts = opts || {};
+    const sx = D * (opts.sqx || 1), sy = D * (opts.sqy || 1);
+    const snap = (v)=> Math.round(v / D) * D;
+    const ox = snap(footX - gridW * sx / 2);
+    const oy = snap(footY - gridH * sy);
+    const flash = !!opts.flash, mir = !!opts.mirror, diss = opts.dissolve || 0;
+    const P = { W: gridW, H: gridH, OUT: '#000000', ghost: false };
+    P._cell = function(cx, cy, col){
+      cx = Math.round(cx); cy = Math.round(cy);
+      if(cx < 0 || cy < 0 || cx >= gridW || cy >= gridH) return;
+      if(P.ghost && ((cx + cy) & 1)) return;
+      if(diss && ((((cx * 7 + cy * 13) & 15) / 15) < diss)) return;
+      ctx2d.fillStyle = flash ? (col === P.OUT ? '#5a1a15' : '#ff6f5c') : col;
+      const c = mir ? (gridW - 1 - cx) : cx;
+      ctx2d.fillRect(ox + c * sx, oy + cy * sy, sx + 0.6, sy + 0.6);
+    };
+    P.px = function(x, y, col){ P._cell(x, y, col); };
+    P.rect = function(x, y, w2, h2, col){ for(let j = 0; j < h2; j++) for(let i = 0; i < w2; i++) P._cell(x + i, y + j, col); };
+    P.ell = function(cx, cy, rx, ry, col){
+      const RX = Math.ceil(rx), RY = Math.ceil(ry);
+      for(let j = -RY; j <= RY; j++) for(let i = -RX; i <= RX; i++)
+        if((i * i) / (rx * rx) + (j * j) / (ry * ry) <= 1.05) P._cell(cx + i, cy + j, col);
+    };
+    P.ring = function(cx, cy, rx, ry, col){
+      for(let a = 0; a < 6.3; a += 0.10) P._cell(Math.round(cx + Math.cos(a) * rx), Math.round(cy + Math.sin(a) * ry), col);
+    };
+    P.line = function(x0, y0, x1, y1, col){
+      x0 = Math.round(x0); y0 = Math.round(y0); x1 = Math.round(x1); y1 = Math.round(y1);
+      const dx2 = Math.abs(x1 - x0), dy2 = Math.abs(y1 - y0), sxx = x0 < x1 ? 1 : -1, syy = y0 < y1 ? 1 : -1;
+      let err = dx2 - dy2;
+      for(;;){ P._cell(x0, y0, col); if(x0 === x1 && y0 === y1) break; const e2 = 2 * err; if(e2 > -dy2){ err -= dy2; x0 += sxx; } if(e2 < dx2){ err += dx2; y0 += syy; } }
+    };
+    P.tri = function(ax, ay, bx, by, cx, cy, col){
+      const minY = Math.min(ay, by, cy), maxY = Math.max(ay, by, cy);
+      for(let y = minY; y <= maxY; y++){
+        const xs = [];
+        [[ax,ay,bx,by],[bx,by,cx,cy],[cx,cy,ax,ay]].forEach(function(e){
+          const y0 = e[1], y1 = e[3];
+          if((y0 <= y && y1 > y) || (y1 <= y && y0 > y)) xs.push(e[0] + (e[2] - e[0]) * (y - y0) / (y1 - y0));
+        });
+        xs.sort(function(m,n){ return m - n; });
+        for(let k = 0; k + 1 < xs.length; k += 2) for(let x = Math.round(xs[k]); x <= Math.round(xs[k+1]); x++) P._cell(x, y, col);
+      }
+    };
+    return P;
+  }
+
+  // shade helpers for eye-glow flicker
+  function glowCol(base, t){ return (Math.sin(t * 3.4) > 0.1) ? '#fff6d2' : base; }
+
+  const PXDRAW = {
+    discord_slime: function(P, t){
+      const O='#0e2a1a', D1='#1a6b3c', M='#31a555', L='#79df8b', E='#0b1e13', W='#eafff0';
+      P.OUT=O;
+      P.ell(12,10,11,8,O); P.rect(1,11,22,6,O);
+      P.ell(12,10,10,7,D1); P.rect(2,11,20,5,D1);
+      P.ell(12,9,8,6,M);
+      P.ell(10,7,6,3,L); P.ell(7,6,2,2,W);
+      P.rect(7,9,2,3,E); P.rect(15,9,2,3,E);
+      P.px(7,9,glowCol('#bff5c9',t)); P.px(15,9,glowCol('#bff5c9',t));
+      P.line(10,13,14,13,O); P.px(9,12,O); P.px(15,12,O);
+      P.line(3,16,20,16,O);
+    },
+    flat_fiend: function(P, t){
+      const O='#25400f', D1='#4a6b1c', M='#7bb03a', L='#c6ef7a', E='#101c06';
+      P.OUT=O;
+      P.line(7,0,7,2,O); P.line(18,0,18,2,O);        // antenna stalks
+      P.ell(13,8,12,5,O);
+      P.ell(13,8,11,4,D1);
+      P.ell(13,7,9,3,M);
+      P.line(3,5,23,5,L);
+      P.rect(9,7,2,3,E); P.rect(15,7,2,3,E);
+      P.px(9,7,glowCol('#d6ffa0',t)); P.px(16,7,glowCol('#d6ffa0',t));
+      P.px(10,11,O); P.line(11,12,15,12,O); P.px(16,11,O);   // downturned mouth
+    },
+    muddy_muddler: function(P, t){
+      const O='#241705', D1='#4a3416', M='#7c5a2c', L='#ac8848', DK='#160f04';
+      P.OUT=O;
+      P.ell(11,11,10,7,O); P.ell(6,8,4,3,O); P.ell(16,9,4,3,O);
+      P.ell(11,11,9,6,D1); P.ell(6,8,3,2,D1); P.ell(16,9,3,2,D1);
+      P.ell(11,10,7,4,M);
+      P.px(5,7,DK); P.px(14,13,DK); P.px(9,14,DK); P.px(17,11,DK);
+      P.ell(9,6,2,1,L);
+      P.rect(8,9,2,2,DK); P.rect(13,10,2,2,DK);
+      P.line(9,13,13,12,O);
+      P.line(3,17,18,17,O);
+    },
+    sour_bat: function(P, t){
+      const O='#1c1030', D1='#3f2565', M='#6a45a0', L='#a882d8', E='#0a0816', F='#f2e6ff';
+      P.OUT=O;
+      P.tri(9,9,0,1,3,14,O); P.tri(17,9,26,1,23,14,O);       // big angular wings
+      P.tri(9,9,2,4,4,12,M); P.tri(17,9,24,4,22,12,M);
+      P.px(1,5,O); P.px(2,9,O); P.px(24,5,O); P.px(23,9,O);   // wing points
+      P.tri(9,3,7,8,12,8,O); P.tri(17,3,19,8,14,8,O);          // pointed ears
+      P.ell(13,9,5,5,O);
+      P.ell(13,9,4,4,D1);
+      P.ell(13,8,3,2,M);
+      P.rect(10,8,2,2,glowCol('#ffdf5a',t)); P.rect(15,8,2,2,glowCol('#ffdf5a',t));
+      P.px(11,13,F); P.px(15,13,F); P.px(13,14,O);
+    },
+    screeching_owlbat: function(P, t){
+      const O='#241804', D1='#4c3717', M='#7d5f2e', L='#c6a662', E='#0d0a05', W='#f4ecd8', BK='#e0a53c';
+      P.OUT=O;
+      P.tri(7,7,3,0,10,6,O); P.tri(17,7,21,0,14,6,O);
+      P.tri(1,13,6,7,7,16,O); P.tri(23,13,18,7,17,16,O);
+      P.tri(2,12,7,8,7,15,M); P.tri(22,12,17,8,17,15,M);
+      P.ell(12,11,8,8,O);
+      P.ell(12,11,7,7,D1);
+      P.ell(12,10,5,5,M);
+      P.ell(12,7,4,2,L);
+      P.ell(9,10,3,3,W); P.ell(15,10,3,3,W);
+      P.rect(8,9,2,3,E); P.rect(14,9,2,3,E);
+      P.px(8,9,glowCol('#ffffff',t)); P.px(14,9,glowCol('#ffffff',t));
+      P.tri(11,13,13,13,12,16,BK);
+    },
+    offkey_imp: function(P, t){
+      const O='#2c0a06', D1='#7a2417', M='#c0432c', L='#ff8a5a', E='#140503', H='#3a0f0a';
+      P.OUT=O;
+      P.line(6,4,3,0,H); P.line(7,4,4,0,H); P.line(10,4,13,0,H); P.line(11,4,14,0,H);
+      P.tri(2,14,0,11,3,15,O); P.tri(14,14,16,11,13,15,O);
+      P.ell(8,7,5,5,O); P.tri(3,10,13,10,8,20,O);
+      P.ell(8,7,4,4,D1); P.tri(4,11,12,11,8,19,D1);
+      P.ell(8,6,3,3,M);
+      P.rect(6,6,2,2,glowCol('#ffd24a',t)); P.rect(9,6,2,2,glowCol('#ffd24a',t));
+      P.line(6,10,10,10,E); P.px(6,9,E); P.px(10,9,E);
+      P.line(11,17,15,20,O); P.tri(14,19,17,19,16,22,O);
+      P.line(3,20,13,20,O);
+    },
+    grating_goblin: function(P, t){
+      const O='#1e2a0c', D1='#3f5a1c', M='#6e8a3e', L='#a6c46a', E='#0c1305', MET='#9aa0a6', MD='#5a5f66';
+      P.OUT=O;
+      P.px(7,0,O); P.px(9,0,O); P.px(11,0,O); P.line(7,1,7,3,O); P.line(9,1,9,3,O); P.line(11,1,11,3,O);
+      P.tri(3,10,0,6,5,12,O); P.tri(15,10,19,6,13,12,O);
+      P.tri(3,10,1,7,5,11,M); P.tri(15,10,17,7,13,11,M);
+      P.ell(9,12,7,7,O);
+      P.ell(9,12,6,6,D1);
+      P.ell(9,11,4,4,M);
+      P.rect(6,10,2,2,glowCol('#e8ffa0',t)); P.rect(10,10,2,2,glowCol('#e8ffa0',t));
+      for(let i=0;i<5;i++) P.px(6+i, 15, (i&1)?E:L);
+      P.rect(13,9,5,8,MD); P.rect(14,10,3,6,MET);
+      for(let gy=0;gy<3;gy++) for(let gx=0;gx<2;gx++) P.px(15+gx,11+gy*2,MD);
+      P.line(2,19,16,19,O);
+    },
+    static_wisp: function(P, t){
+      const O='#0c2530', D1='#1d5266', M='#38879e', L='#8fe0ee', E='#071319', BOLT='#fff2a0';
+      P.OUT=O;
+      P.ghost = true;
+      P.ell(9,9,8,8,M);
+      P.ghost = false;
+      P.ell(9,9,7,7,O);
+      P.ell(9,9,6,6,D1);
+      P.ell(9,8,4,4,M);
+      P.line(11,2,7,8,BOLT); P.line(7,8,10,9,BOLT); P.line(10,9,6,16,BOLT);
+      P.rect(6,8,2,2,glowCol('#e8ffff',t)); P.rect(11,8,2,2,glowCol('#e8ffff',t));
+      P.px(2,4,L); P.px(16,5,L); P.px(3,14,L); P.px(15,13,L); P.px(9,1,L); P.px(9,17,L);
+    },
+    _placeholder: null
+  };
+  PXDRAW.dissonant_drone = function(P, t){
+    const O='#1b1f26', D1='#3c414b', M='#7c848f', L='#bcc2cc', E='#0d1015', RED='#e2574c';
+    P.OUT=O;
+    P.line(6,1,18,1,D1); P.line(6,1,6,5,D1); P.line(18,1,18,5,D1);   // band
+    P.rect(0,5,5,9,O); P.rect(19,5,5,9,O);                            // ear cups
+    P.rect(1,6,3,7,D1); P.rect(20,6,3,7,D1);
+    P.px(2,9,L); P.px(21,9,L);
+    P.ell(12,9,6,6,O);                                                // bigger head
+    P.ell(12,9,5,5,D1);
+    P.ell(12,8,4,3,M);
+    P.ell(11,6,3,1,L);
+    P.line(9,7,11,10,E); P.line(11,7,9,10,E);                         // X eyes
+    P.line(14,7,16,10,E); P.line(16,7,14,10,E);
+    P.rect(11,12,3,2,RED);                                            // buzzing mouth
+    P.px(12,0,L);
+  };
+  PXDRAW.warble_wraith = function(P, t){
+    const O='#232a4a', D1='#3a4a7a', M='#6272b0', L='#a7b4e6', E='#0d1024';
+    P.OUT=O; P.ghost=false;
+    P.ell(9,8,7,6,O);
+    P.rect(3,8,13,9,O);
+    for(let i=0;i<16;i++) P.px(2+i, 17 + (i&1?0:1), (i&1)?O:D1);
+    P.ell(9,8,6,5,D1);
+    P.rect(4,8,11,8,D1);
+    P.ghost=true; P.ell(9,7,5,4,M); P.ghost=false;
+    P.ring(7,8,2,2,L); P.ring(12,8,2,2,L);
+    P.px(7,8,glowCol('#e8ecff',t)); P.px(12,8,glowCol('#e8ecff',t));
+    P.px(2,11,M); P.px(16,11,M);
+  };
+  PXDRAW.noise_newt = function(P, t){
+    const O='#1c3410', D1='#39561c', M='#5f8f3e', L='#a6d47a', E='#0c1806', SP='#d6ef9c';
+    P.OUT=O;
+    P.ell(12,7,12,3,O);
+    P.ell(21,7,4,3,O);
+    P.line(2,7,0,4,O);
+    P.ell(12,7,11,2,D1);
+    P.ell(21,7,3,2,D1);
+    P.line(4,6,20,6,M);
+    P.px(7,5,SP); P.px(11,6,SP); P.px(15,5,SP);
+    P.line(5,9,5,11,O); P.line(10,9,10,11,O); P.line(16,9,16,11,O); P.line(20,9,20,11,O);
+    P.rect(21,6,2,2,E);
+    P.line(19,8,23,8,O);
+  };
+  PXDRAW.rattling_rattler = function(P, t){
+    const O='#3a2c10', D1='#6c5424', M='#b99a4e', L='#f0dfae', E='#1a1206', DI='#5c4a22';
+    P.OUT=O;
+    const path = [];
+    for(let i=0;i<=20;i++){ path.push([3 + i, 9 + Math.round(Math.sin(i*0.5) * 3)]); }
+    path.forEach(function(p){ P.ell(p[0], p[1], 2, 2, O); });
+    path.forEach(function(p, i){ if(i>0 && i<20) P.ell(p[0], p[1], 1, 1, (i&3)===0 ? DI : M); });
+    // head at right
+    P.ell(24,path[20][1],3,3,O); P.ell(24,path[20][1],2,2,D1);
+    P.px(24,path[20][1]-1,glowCol('#ffe27a',t));
+    P.px(26,path[20][1],O); P.px(26,path[20][1]+1,O);
+    // rattle at left
+    P.rect(0,7,3,2,L); P.rect(0,10,3,2,L); P.rect(1,13,2,2,L);
+  };
+  PXDRAW.cacophony_crawler = function(P, t){
+    const O='#2a1c40', D1='#4a367a', M='#7a5ca0', L='#c8b4ef', E='#120c22';
+    P.OUT=O;
+    for(let i=0;i<6;i++){
+      const cx = 4 + i*4;
+      P.tri(cx-2,6,cx+2,6,cx,2,O);
+      P.ell(cx,9,3,3,O);
+      P.ell(cx,9,2,2,(i&1)?D1:M);
+      P.line(cx-1,12,cx-2,14,O); P.line(cx+1,12,cx+2,14,O);
+    }
+    P.ell(25,8,3,3,O); P.ell(25,8,2,2,M);
+    P.px(24,7,glowCol('#e8d6ff',t)); P.px(26,7,glowCol('#e8d6ff',t));
+    P.line(27,7,29,6,O); P.line(27,9,29,10,O);
+  };
+  PXDRAW.buzzing_beetle = function(P, t){
+    const O='#182507', D1='#33501c', M='#4f7b3a', L='#9fdc7a', E='#0a1204', W='#e8ffd4';
+    P.OUT=O;
+    P.line(6,2,2,0,O); P.line(16,2,20,0,O);
+    P.ell(11,11,9,7,O);
+    P.ell(11,11,8,6,D1);
+    P.line(11,5,11,17,O);
+    P.ell(8,9,3,3,M); P.ell(14,9,3,3,M);
+    P.ell(8,7,4,2,L);
+    P.ell(7,9,2,2,W); P.ell(15,9,2,2,W);
+    P.px(7,9,E); P.px(15,9,E);
+    P.line(2,10,4,12,O); P.line(2,13,4,14,O); P.line(20,10,18,12,O); P.line(20,13,18,14,O);
+    P.line(4,17,3,19,O); P.line(11,18,11,20,O); P.line(18,17,19,19,O);
+  };
+  PXDRAW.tritone_troll = function(P, t){
+    const O='#2a2013', D1='#4d3a24', M='#836044', L='#b89066', E='#140f08', LC='#5a3a2c';
+    P.OUT=O;
+    P.ell(12,17,10,9,O);                       // torso
+    P.ell(12,17,9,8,D1);
+    P.ell(12,15,6,4,M);
+    P.ell(12,7,4,4,O);                         // head, bigger & sat on shoulders
+    P.ell(12,7,3,3,D1);
+    P.ell(12,6,2,1,L);
+    P.rect(9,7,2,2,glowCol('#ffe6b0',t)); P.rect(13,7,2,2,glowCol('#ffe6b0',t));
+    P.px(9,10,L); P.px(15,10,L);               // tusks
+    P.tri(3,11,8,13,2,21,O); P.ell(3,21,4,4,O); P.ell(3,21,3,3,M);   // huge left fist
+    P.tri(21,13,16,15,22,22,O); P.ell(22,22,3,3,O); P.ell(22,22,2,2,M);
+    P.rect(7,24,4,2,O); P.rect(14,24,4,2,O);   // stumpy feet
+    P.rect(7,19,10,3,LC);                       // loincloth
+  };
+  PXDRAW.clashing_cleric = function(P, t){
+    const O='#33322a', D1='#6e6a5a', M='#a7a290', L='#e4dfc8', E='#12130f', GD='#c6a03f';
+    P.OUT=O;
+    P.tri(8,2,3,9,13,9,O);
+    P.rect(2,9,12,13,O);
+    P.tri(8,3,4,9,12,9,D1);
+    P.rect(3,9,10,12,D1);
+    P.rect(4,12,8,2,M); P.rect(4,17,8,2,M);
+    P.rect(6,5,4,3,E);
+    P.px(6,6,glowCol('#e8ffff',t)); P.px(9,6,glowCol('#e8ffff',t));
+    P.line(14,2,14,21,O); P.ell(14,3,2,2,GD);
+    P.line(2,22,12,22,O);
+  };
+  PXDRAW.chaos_choir = function(P, t){
+    const O='#2e1f3c', D1='#4c3568', M='#7a5ca0', L='#d0b8ef', E='#150c22', MO='#0c0616';
+    P.OUT=O;
+    P.tri(9,1,3,9,15,9,O);
+    P.rect(2,9,15,14,O);
+    P.tri(9,2,4,9,14,9,D1);
+    P.rect(3,9,13,13,D1);
+    P.rect(6,4,6,4,E);
+    P.px(7,6,glowCol('#e8d6ff',t)); P.px(11,6,glowCol('#e8d6ff',t));
+    P.ring(6,12,2,2,MO); P.ring(12,14,2,2,MO); P.ring(8,18,2,1,MO);
+    P.px(6,12,MO); P.px(12,14,MO);
+    P.px(0,11,L); P.px(1,13,L); P.px(17,15,L); P.px(18,17,L);
+  };
+  PXDRAW.void_virtuoso = function(P, t){
+    const O='#0d0a18', D1='#221b3a', M='#3d3470', L='#9a86d6', E='#050310', BT='#eaf2ff';
+    P.OUT=O;
+    P.tri(9,0,3,10,15,10,O);                    // hood
+    P.rect(2,10,15,13,O);
+    for(let i=0;i<8;i++){ const hh = 1 + ((i*5)%3); for(let k=0;k<hh;k++) P._cell(2 + i*2, 22+k, O); }  // ragged hem
+    P.tri(9,1,4,10,14,10,D1);
+    P.rect(3,10,13,12,D1);
+    P.px(5,13,L); P.px(9,16,L); P.px(13,13,L); P.px(7,19,L); P.px(11,20,L); P.px(6,15,M); P.px(12,18,M);  // void motes
+    P.rect(6,6,6,3,E);                          // face void
+    P.px(7,7,glowCol('#c4b0ff',t)); P.px(10,7,glowCol('#c4b0ff',t));
+    P.line(15,10,17,7,D1);                      // raised arm
+    P.line(17,7,23,1,BT); P.px(23,0,'#ffffff'); P.px(22,1,'#ffffff'); P.px(24,1,BT);  // baton + spark
+  };
+  PXDRAW.sharp_specter = function(P, t){
+    const O='#1e3550', D1='#37566b', M='#5f89a6', L='#cfeaff', E='#0b1a28';
+    P.OUT=O;
+    const spikes = [[11,1],[19,4],[21,11],[18,18],[11,21],[4,18],[1,11],[4,4]];
+    spikes.forEach(function(s){ P.tri(11,11,s[0],s[1], 11 + (s[0]-11)*0.4 + (s[1]-11)*0.3, 11 + (s[1]-11)*0.4 - (s[0]-11)*0.3, O); });
+    P.ghost=true;
+    spikes.forEach(function(s){ P.line(11,11,s[0],s[1],D1); });
+    P.ghost=false;
+    P.ell(11,11,6,6,O);
+    P.ell(11,11,5,5,D1);
+    P.ell(11,10,3,3,M);
+    P.tri(7,9,10,10,7,12,E); P.tri(15,9,12,10,15,12,E);
+    P.px(9,10,glowCol('#eaf6ff',t)); P.px(13,10,glowCol('#eaf6ff',t));
+  };
+  PXDRAW.howling_horror = function(P, t){
+    const O='#1c2440', D1='#2c3358', M='#4a5688', L='#aab6e6', E='#0b1024', MO='#05081a';
+    P.OUT=O;
+    P.ell(14,12,13,11,O);
+    P.rect(2,12,25,10,O);
+    const hem = [4,2,6,3,5,2,7,4,5,3];
+    for(let i=0;i<10;i++) for(let k=0;k<hem[i];k++) P._cell(3 + i*2, 22 + k, O);
+    P.ell(14,12,12,10,D1);
+    P.rect(3,12,23,9,D1);
+    P.ghost=true; P.ell(14,10,9,7,M); P.ghost=false;
+    P.ell(9,10,2,2,O); P.ell(19,10,2,2,O);
+    P.px(9,10,glowCol('#dfe8ff',t)); P.px(19,10,glowCol('#dfe8ff',t));
+    P.ring(14,16,4,4,MO); P.ell(14,16,3,3,MO);
+    P.px(1,14,M); P.px(27,14,M);
+  };
+
+  // Blit the pixel monster for `id` at the given foot position (logical coords).
+  function blitMonster(ctx2d, id, footX, footY, D, opts){
+    const draw = PXDRAW[id] || PXDRAW.discord_slime;
+    // grid sizes match the coordinates each PXDRAW paints within
+    const SIZES = {
+      discord_slime:[24,17], flat_fiend:[26,13], muddy_muddler:[22,18], sour_bat:[27,15],
+      screeching_owlbat:[24,20], offkey_imp:[16,21], grating_goblin:[20,20], static_wisp:[18,18],
+      dissonant_drone:[24,15], warble_wraith:[18,19], noise_newt:[26,13], rattling_rattler:[27,16],
+      cacophony_crawler:[30,15], buzzing_beetle:[22,21], tritone_troll:[25,26], clashing_cleric:[16,23],
+      chaos_choir:[18,24], void_virtuoso:[25,26], sharp_specter:[22,22], howling_horror:[28,27]
+    };
+    const gs = SIZES[id] || [24,20];
+    const P = makePixCtx(ctx2d, footX, footY, gs[0], gs[1], D, opts);
+    draw(P, (opts && opts.t) || 0);
+  }
+
+  // flat pixel drop-shadow: a squashed diamond of dark cells on the ground
+  function drawPixelShadow(ctx2d, cx, groundY, halfCells, D, a){
+    ctx2d.save();
+    ctx2d.globalAlpha = Math.max(0, Math.min(1, a));
+    ctx2d.fillStyle = '#000000';
+    const snap = (v)=> Math.round(v / D) * D;
+    const bx = snap(cx), by = snap(groundY);
+    for(let i = -halfCells; i <= halfCells; i++){
+      const tt = 1 - Math.abs(i) / (halfCells + 1);
+      const hh = Math.max(1, Math.round(tt * 2));
+      ctx2d.fillRect(bx + i * D, by - (hh - 1) * D, D + 0.6, hh * D + 0.6);
+    }
+    ctx2d.restore();
+  }
+
   function drawEnemy(ctx2d, w, h, groundY, idleBob, now){
     let dx=0, alpha=1, scaleAnim=1, flash=false;
     let sqx=1, sqy=1, rock=0, bob=0;
@@ -2250,98 +2616,38 @@
       else { sqy = 1 + Math.sin(ph*2.4)*0.04; sqx = 1 - Math.sin(ph*2.4)*0.02; }
     }
 
-    const ENEMY_BASE_SCALE = 2.05;
-    // foes loom a little larger the deeper the run goes
     const menace = 1 + Math.min(0.30, enemiesDefeated * 0.015);
-    const baseScale = ENEMY_BASE_SCALE * ((battle.enemy && battle.enemy.scale) || 1) * menace;
-    const baseX = w*0.76, baseY = groundY - 6 + (reducedMotion ? 0 : idleBob*0.4);
+    const espec = (battle.enemy && battle.enemy.scale) || 1;
+    const baseX = w*0.76, baseY = groundY - 4 + (reducedMotion ? 0 : idleBob*0.4);
     const tint = MONSTER_TINT[id] || '#8FA0D9';
 
-    // contact shadow -- shrinks while airborne / dying
-    const shScale = alpha * (bob ? Math.max(0.5, 1 - Math.abs(bob)/8) : 1);
-    drawGroundShadow(ctx2d, baseX + dx*0.5, groundY + 2, 26 * baseScale/2 * shScale, 6.5, alpha * 0.42);
+    // one pixel-sprite cell, in logical units -- bumped up for these small foes
+    const D = SCENE_LP * 1.35 * espec * menace;
 
-    // ---- render the raw sprite into the offscreen buffer ----
-    ensureEnemyBufs();
-    ebx.setTransform(1,0,0,1,0,0);
-    ebx.globalCompositeOperation = 'source-over';
-    ebx.globalAlpha = 1;
-    ebx.filter = 'none';
-    ebx.clearRect(0,0,EBUF,EBUF);
-    ebx.save();
-    ebx.translate(EORIGX, EORIGY);
-    ebx.scale(-ELOCAL, ELOCAL);            // mirror to face the knight
-    EYE_CAPTURE = [];
-    drawEnemyShape(ebx, id, flash);
-    const eyes = EYE_CAPTURE; EYE_CAPTURE = null;
-    ebx.restore();
+    // dissolve on death instead of a fade
+    const diss = battle.state === 'enemyDefeat'
+      ? Math.min(0.95, ((now - battle.stateStart) / STATE_DURATIONS.enemyDefeat))
+      : (battle.state === 'enemySpawn'
+        ? Math.max(0, 0.9 - ((now - battle.stateStart) / STATE_DURATIONS.enemySpawn))
+        : 0);
 
-    // volumetric light: bright crown, shaded base -- clipped to the sprite
-    ebx.globalCompositeOperation = 'source-atop';
-    const lg = ebx.createLinearGradient(0, EORIGY - ELOCAL*40, 0, EORIGY + ELOCAL*6);
-    lg.addColorStop(0.00, flash ? 'rgba(255,255,255,0.30)' : 'rgba(255,248,232,0.26)');
-    lg.addColorStop(0.45, 'rgba(255,255,255,0)');
-    lg.addColorStop(1.00, 'rgba(4,4,14,0.42)');
-    ebx.fillStyle = lg;
-    ebx.fillRect(0,0,EBUF,EBUF);
-    // faint sheen from the moon side (screen-right of the mirrored sprite)
-    const sg = ebx.createLinearGradient(EORIGX + ELOCAL*26, 0, EORIGX - ELOCAL*4, 0);
-    sg.addColorStop(0, 'rgba(180,205,235,0.16)');
-    sg.addColorStop(1, 'rgba(180,205,235,0)');
-    ebx.fillStyle = sg;
-    ebx.fillRect(0,0,EBUF,EBUF);
-    ebx.globalCompositeOperation = 'source-over';
+    const footX = baseX + dx;
+    const footY = baseY + bob;
 
-    // glowing eyes
-    if(!flash && eyes && eyes.length){
-      ebx.save();
-      ebx.setTransform(1,0,0,1,0,0);
-      ebx.globalCompositeOperation = 'lighter';
-      const eyeGlow = shade(tint, 0.55);
-      eyes.forEach(function(e){
-        const rr = Math.max(2, e.r * 2.6);
-        const rg = ebx.createRadialGradient(e.x, e.y, 0, e.x, e.y, rr);
-        rg.addColorStop(0, 'rgba(255,246,214,0.85)');
-        rg.addColorStop(0.4, eyeGlow);
-        rg.addColorStop(1, 'rgba(0,0,0,0)');
-        ebx.fillStyle = rg;
-        ebx.beginPath(); ebx.arc(e.x, e.y, rr, 0, Math.PI*2); ebx.fill();
-      });
-      ebx.restore();
+    // pixel drop-shadow
+    drawPixelShadow(ctx2d, footX, groundY, Math.round(9 * espec), D, (alpha) * 0.4 * (bob ? Math.max(0.4, 1 - Math.abs(bob)/9) : 1));
+
+    // ghostly aura: a dim, offset silhouette pass behind the sprite
+    const auraS = enemyAuraStrength(id);
+    if(!reducedMotion && auraS > 0.3 && battle.state !== 'enemyDefeat'){
+      const puff = (Math.sin(now/300) > 0 ? 1 : 0);
+      blitMonster(ctx2d, id, footX, footY - D, D, { mirror:true, tintAll: tint, aura:true, t: now/1000,
+        dissolve: 0.55 + puff*0.15, sqx: sqx*1.06, sqy: sqy*1.06 });
     }
 
-    // ---- composite the buffer back into the scene ----
-    const k = (scaleAnim * baseScale / ELOCAL);
-    ctx2d.save();
-    ctx2d.globalAlpha = alpha;
-    ctx2d.translate(baseX + dx, baseY + bob);
-    ctx2d.rotate(rock);
-    ctx2d.scale(k * sqx, k * sqy);
-
-    // aura -- blurred, additive, coloured
-    const aura = enemyAuraStrength(id) * (idling ? 1 : 0.8);
-    if(!reducedMotion && aura > 0){
-      const pulse = 0.85 + 0.15 * Math.sin(now/430);
-      ctx2d.save();
-      ctx2d.globalAlpha = alpha * aura * pulse;
-      ctx2d.globalCompositeOperation = 'lighter';
-      ctx2d.filter = 'blur(6px)';
-      ctx2d.drawImage(enemySil(tint), -EORIGX*1.16, -EORIGY*1.12, EBUF*1.16, EBUF*1.16);
-      ctx2d.restore();
-      ctx2d.filter = 'none';
-    }
-
-    // rim light -- crisp bright edge, behind the body so only the fringe shows
-    ctx2d.save();
-    ctx2d.globalAlpha = alpha * (flash ? 0.5 : 0.9);
-    ctx2d.filter = 'blur(0.6px)';
-    ctx2d.drawImage(enemySil(flash ? '#FFD9D4' : '#EAF0FF'), -EORIGX - 2.4, -EORIGY - 3.0, EBUF, EBUF);
-    ctx2d.restore();
-    ctx2d.filter = 'none';
-
-    // the shaded sprite itself
-    ctx2d.drawImage(enemyBuf, -EORIGX, -EORIGY, EBUF, EBUF);
-    ctx2d.restore();
+    blitMonster(ctx2d, id, footX, footY, D, {
+      mirror: true, flash: flash, dissolve: diss, sqx: sqx, sqy: sqy, t: now/1000
+    });
   }
 
 
@@ -2350,17 +2656,19 @@
   }
 
   function drawParticles(ctx2d, w, h, now){
+    const D = SCENE_LP, snap = (v)=> Math.round(v / D) * D;
     battle.particles.forEach((p)=>{
       const age = (now - p.born)/p.life;
       if(age >= 1) return;
-      const x = (p.x + p.vx*age) * w;
-      const y = (p.y + p.vy*age + 0.5*(p.g||0)*age*age) * h;
-      const fade = (1-age)*(1-age);
-      ctx2d.globalAlpha = fade;
+      const x = snap((p.x + p.vx*age) * w);
+      const y = snap((p.y + p.vy*age + 0.5*(p.g||0)*age*age) * h);
+      // fade in hard steps rather than a smooth alpha ramp
+      const step = (1-age) > 0.66 ? 1 : ((1-age) > 0.33 ? 0.6 : 0.3);
+      ctx2d.globalAlpha = step;
       ctx2d.fillStyle = p.color || GB.bright;
-      const s = Math.max(0.6, (p.size || 2) * (1 - age*0.45));
-      if(p.shard){ ctx2d.fillRect(x - s*0.32, y - s*1.1, s*0.64, s*2.2); }
-      else { ctx2d.fillRect(x - s/2, y - s/2, s, s); }
+      const big = ((p.size || 2) * (1 - age*0.5)) > 2.4;
+      if(p.shard){ ctx2d.fillRect(x, y - D, D, 3*D); }
+      else { ctx2d.fillRect(x, y, big ? 2*D : D, big ? 2*D : D); }
     });
     ctx2d.globalAlpha = 1;
   }
@@ -2420,91 +2728,126 @@
     ctx2d.fill();
   }
 
+  // 4x4 Bayer matrix (0..15) for ordered dithering the sky bands
+  const BAYER4 = [0,8,2,10, 12,4,14,6, 3,11,1,9, 15,7,13,5];
+  const SKY_RAMP = [[12,10,26],[20,15,38],[30,21,51],[46,26,56],[67,34,58],[92,46,60]];
+
+  // The dithered sky never changes between frames -- bake it once per buffer size.
+  let skyCache = null, skyCacheKey = '';
+  function getSkyCache(pw, ph, horizonPx){
+    const key = pw + 'x' + ph + 'x' + horizonPx;
+    if(skyCacheKey === key) return skyCache;
+    const cv = document.createElement('canvas'); cv.width = pw; cv.height = ph;
+    const c = cv.getContext('2d');
+    const img = c.createImageData(pw, ph);
+    const dta = img.data;
+    const bands = SKY_RAMP.length;
+    for(let y = 0; y < ph; y++){
+      const f = Math.min(1, y / horizonPx);
+      const lvl = f * (bands - 1);
+      const lo = Math.floor(lvl), frac = lvl - lo;
+      for(let x = 0; x < pw; x++){
+        const th = (BAYER4[(y & 3) * 4 + (x & 3)] + 0.5) / 16;
+        const col = SKY_RAMP[Math.min(bands - 1, lo + (frac > th ? 1 : 0))];
+        const o = (y * pw + x) * 4;
+        dta[o] = col[0]; dta[o+1] = col[1]; dta[o+2] = col[2]; dta[o+3] = 255;
+      }
+    }
+    c.putImageData(img, 0, 0);
+    skyCache = cv; skyCacheKey = key;
+    return cv;
+  }
+
   function drawBackdrop(ctx2d, w, h, groundY, now){
     const t = now / 1000;
     const drift = reducedMotion ? 0 : t;
+    const LP = SCENE_LP;
+    const px = (v)=> Math.round(v / LP) * LP;   // snap to buffer-pixel grid
+    const D = LP;                                // one buffer pixel, in logical units
 
-    const sky = ctx2d.createLinearGradient(0, 0, 0, groundY);
-    sky.addColorStop(0.00, '#0E0A1C');
-    sky.addColorStop(0.45, '#1A1230');
-    sky.addColorStop(0.80, '#3A2036');
-    sky.addColorStop(1.00, '#512A34');
-    ctx2d.fillStyle = sky;
-    ctx2d.fillRect(0, 0, w, groundY);
+    // ---- sky: pre-baked dithered ramp ----
+    const pw = pixelCanvas.width, ph = pixelCanvas.height;
+    const horizonPx = Math.round(groundY / h * ph);
+    // drawn in buffer pixels, but ctx is transformed to logical space -> map back
+    ctx2d.save();
+    ctx2d.setTransform(1,0,0,1,0,0);
+    ctx2d.imageSmoothingEnabled = false;
+    ctx2d.drawImage(getSkyCache(pw, ph, horizonPx), 0, 0);
+    ctx2d.restore();
 
-    // stars
+    // ---- stars: single pixels, hard twinkle ----
+    ctx2d.fillStyle = '#EAD9F2';
     for(let i=0;i<STARS.length;i++){
       const s = STARS[i];
-      const tw = reducedMotion ? 0.7 : (0.45 + 0.55 * Math.abs(Math.sin(t*1.3 + s.tw)));
-      ctx2d.globalAlpha = tw * 0.8;
-      ctx2d.fillStyle = '#EAD9F2';
-      ctx2d.fillRect(s.x * w, s.y * groundY, s.r, s.r);
+      const on = reducedMotion ? (i%3!==0) : (Math.sin(t*2.2 + s.tw) > -0.2);
+      if(!on) continue;
+      ctx2d.fillRect(px(s.x * w), px(s.y * groundY), D, D);
+    }
+
+    // ---- moon: chunky disc + banded halo ----
+    const mx = px(w * 0.80), my = px(groundY * 0.30), mr = px(Math.max(7*D, h * 0.07));
+    for(let ring=3; ring>=1; ring--){
+      ctx2d.globalAlpha = 0.10 * ring;
+      ctx2d.fillStyle = '#F6E7C4';
+      ctx2d.beginPath(); ctx2d.arc(mx, my, mr + ring*2*D, 0, Math.PI*2); ctx2d.fill();
     }
     ctx2d.globalAlpha = 1;
-
-    // moon with glow
-    const mx = w * 0.80, my = groundY * 0.30, mr = Math.max(9, h * 0.075);
-    const glow = ctx2d.createRadialGradient(mx, my, mr*0.4, mx, my, mr*3.4);
-    glow.addColorStop(0, 'rgba(255,240,214,0.32)');
-    glow.addColorStop(1, 'rgba(255,240,214,0)');
-    ctx2d.fillStyle = glow;
-    ctx2d.beginPath(); ctx2d.arc(mx, my, mr*3.4, 0, Math.PI*2); ctx2d.fill();
     ctx2d.fillStyle = '#F3E6C8';
     ctx2d.beginPath(); ctx2d.arc(mx, my, mr, 0, Math.PI*2); ctx2d.fill();
-    ctx2d.fillStyle = 'rgba(120,95,120,0.28)';
-    ctx2d.beginPath(); ctx2d.arc(mx - mr*0.3, my - mr*0.25, mr*0.28, 0, Math.PI*2); ctx2d.fill();
-    ctx2d.beginPath(); ctx2d.arc(mx + mr*0.32, my + mr*0.2, mr*0.18, 0, Math.PI*2); ctx2d.fill();
+    ctx2d.fillStyle = '#D8C6A6';
+    ctx2d.fillRect(mx - 2*D, my - 3*D, 2*D, 2*D);
+    ctx2d.fillRect(mx + D, my + D, D, D);
+    ctx2d.fillRect(mx - 4*D, my + 2*D, D, D);
 
-    // parallax ridges -- far/mid/near, each darker and taller, drifting a little
-    drawRidge(ctx2d, RIDGE_FAR,  w, groundY + 4,  h*0.30, '#241A38', drift * 3);
-    drawRidge(ctx2d, RIDGE_MID,  w, groundY + 8,  h*0.44, '#2B1730', drift * 7);
-    drawRidge(ctx2d, RIDGE_NEAR, w, groundY + 12, h*0.60, '#1C1020', drift * 13);
+    // ---- parallax ridges ----
+    drawRidge(ctx2d, RIDGE_FAR,  w, groundY + D,   h*0.28, '#201933', drift * 3);
+    drawRidge(ctx2d, RIDGE_MID,  w, groundY + 2*D, h*0.42, '#291630', drift * 7);
+    drawRidge(ctx2d, RIDGE_NEAR, w, groundY + 3*D, h*0.58, '#180E1E', drift * 13);
 
-    // ground plane
-    const ground = ctx2d.createLinearGradient(0, groundY, 0, h);
-    ground.addColorStop(0, '#2A1D18');
-    ground.addColorStop(0.5, '#1D1210');
-    ground.addColorStop(1, '#0E0908');
-    ctx2d.fillStyle = ground;
+    // ---- ground: two flat bands + a dithered seam ----
+    ctx2d.fillStyle = '#241813';
     ctx2d.fillRect(0, groundY, w, h - groundY);
+    ctx2d.fillStyle = '#160F0D';
+    ctx2d.fillRect(0, px(groundY + (h-groundY)*0.45), w, h);
+    for(let bx = 0; bx < w; bx += D){
+      if(((bx/D)&1) === 0) continue;
+      ctx2d.fillStyle = '#160F0D';
+      ctx2d.fillRect(bx, px(groundY + (h-groundY)*0.45) - D, D, D);
+    }
+    // lit rim at the horizon
+    ctx2d.fillStyle = '#5A3A34';
+    ctx2d.fillRect(0, groundY, w, D);
+    ctx2d.fillStyle = '#7A4A40';
+    for(let bx = 0; bx < w; bx += 2*D){ ctx2d.fillRect(bx, groundY, D, D); }
 
-    // lit rim right where the ground meets the sky
-    ctx2d.fillStyle = 'rgba(180,110,90,0.20)';
-    ctx2d.fillRect(0, groundY, w, 2);
-    ctx2d.strokeStyle = '#3A2A22';
-    ctx2d.lineWidth = 2;
-    ctx2d.beginPath(); ctx2d.moveTo(4, groundY); ctx2d.lineTo(w-4, groundY); ctx2d.stroke();
-
-    // scattered pebbles / cracks on the ground
+    // ---- pebbles ----
     for(let i=0;i<PEBBLES.length;i++){
       const p = PEBBLES[i];
-      const py = groundY + 6 + p.y * (h - groundY - 8);
-      ctx2d.fillStyle = p.shade > 0.5 ? 'rgba(255,240,220,0.05)' : 'rgba(0,0,0,0.28)';
-      ctx2d.fillRect(p.x * w, py, p.w, Math.max(1, p.w * 0.5));
+      const py = px(groundY + 3*D + p.y * (h - groundY - 5*D));
+      ctx2d.fillStyle = p.shade > 0.5 ? '#2E211B' : '#100A09';
+      ctx2d.fillRect(px(p.x * w), py, D * (p.w > 2 ? 2 : 1), D);
     }
 
-    // drifting embers
+    // ---- drifting embers ----
     if(!reducedMotion){
       for(let i=0;i<EMBERS.length;i++){
         const e = EMBERS[i];
         const prog = ((t * e.sp) + e.phase) % 1;
-        const ex = (e.x + Math.sin((prog + e.phase) * 6.28) * 0.02 * e.sway) * w;
-        const ey = groundY - prog * groundY * 0.9;
-        ctx2d.globalAlpha = Math.sin(prog * Math.PI) * 0.6;
-        ctx2d.fillStyle = i % 3 === 0 ? '#8FD0E0' : '#E8A24C';
-        ctx2d.fillRect(ex, ey, e.r, e.r);
+        if(Math.sin(prog * Math.PI) < 0.25) continue;
+        const ex = px((e.x + Math.sin((prog + e.phase) * 6.28) * 0.02 * e.sway) * w);
+        const ey = px(groundY - prog * groundY * 0.9);
+        ctx2d.fillStyle = i % 3 === 0 ? '#9AD8E6' : '#F0A84C';
+        ctx2d.fillRect(ex, ey, D, D);
       }
-      ctx2d.globalAlpha = 1;
     }
-
-    // CRT scanlines
-    ctx2d.fillStyle = 'rgba(0,0,0,0.13)';
-    for(let y=0; y<h; y+=3){ ctx2d.fillRect(0, y, w, 1); }
   }
 
-  // Render into a modest offscreen buffer, then block-scale it up with smoothing
-  // OFF -- retro chunk without the mush the old 0.4 / smoothed buffer produced.
-  const PIXEL_SCALE = 0.62;
+  // TRUE retro framebuffer: the whole scene renders into a fixed low-resolution
+  // buffer (square pixels, no antialias), then nearest-neighbour scales up to the
+  // visible canvas. Every draw call still works in logical w/h coords -- the ctx
+  // transform squashes them into the tiny buffer, so everything comes out chunky.
+  const SCENE_H = 96;              // internal buffer height in pixels
+  let SCENE_LP = 2.4;             // logical units per buffer pixel (set each frame)
   let pixelCanvas = null, pixelCtx = null;
 
   function getPixelCtx(w, h){
@@ -2512,17 +2855,19 @@
       pixelCanvas = document.createElement('canvas');
       pixelCtx = pixelCanvas.getContext('2d');
     }
-    const pw = Math.max(1, Math.round(w*PIXEL_SCALE));
-    const ph = Math.max(1, Math.round(h*PIXEL_SCALE));
+    const ph = SCENE_H;
+    const pw = Math.max(1, Math.round(SCENE_H * w / h));
     if(pixelCanvas.width !== pw || pixelCanvas.height !== ph){
       pixelCanvas.width = pw;
       pixelCanvas.height = ph;
     }
-    pixelCtx.setTransform(1,0,0,1,0,0);
+    SCENE_LP = h / SCENE_H;
+    pixelCtx.setTransform(pw / w, 0, 0, ph / h, 0, 0);
     pixelCtx.imageSmoothingEnabled = false;
-    pixelCtx.scale(PIXEL_SCALE, PIXEL_SCALE);
     return pixelCtx;
   }
+  // snap a logical coordinate to the buffer-pixel grid
+  function snapPx(v){ return Math.round(v / SCENE_LP) * SCENE_LP; }
 
   function drawBattle(now){
     // Hitstop: while frozen, push the state clock forward so both the state
@@ -2618,6 +2963,7 @@
 
     scopeRAF = requestAnimationFrame(drawBattle);
   }
+  window.__px = { blitMonster: blitMonster, ENEMIES: ENEMIES, drawPixelShadow: drawPixelShadow };
 
   // ---------- Round generation ----------
   let lastRoundKey = null;
