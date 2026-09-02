@@ -172,7 +172,14 @@
   }
   .theme-toggle:hover{ border-color: var(--brass-dim); color: var(--cream); }
   .theme-toggle:focus-visible{ outline: 3px solid var(--screen-trace); outline-offset: 2px; }
-  .theme-toggle .tt-icon{ font-size: 14px; line-height:1; }
+  .theme-toggle .tt-icon{
+    font-size: 13px;
+    line-height: 1;
+    display: inline-block;
+    position: relative;
+    top: -1.5px;               /* the ☾ / ☀ glyphs hang low in their box */
+  }
+  .theme-toggle #themeLabel{ line-height: 1; }
   .readouts{
     display:flex; gap: 14px; align-items:center;
   }
