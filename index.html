@@ -117,6 +117,7 @@
     background: radial-gradient(circle at 35% 30%, #6b5a38, #241d13);
   }
   :root[data-theme="dark"] .key.accidental{ background:#171310; }
+  :root[data-theme="dark"] .tut-cell.black{ background:#171310; }
   :root[data-theme="dark"] .quality-toggle .led{ background:#3a3024; }
   :root[data-theme="dark"] .weapon-cell.equipped{ background: linear-gradient(180deg, #33291a, var(--panel)); }
   :root[data-theme="dark"] .end-overlay{ background: rgba(10,8,5,0.86); }
@@ -594,6 +595,68 @@
   .formula-row .fq-formula{ font-family:'Share Tech Mono', monospace; font-size:15px; color: var(--screen-trace); }
   .formula-row.highlight{ background: rgba(240,201,104,0.14); border-radius:6px; }
 
+  /* ---- Step-by-step tutorial ---- */
+  .howto-actions{ margin: -8px 0 18px; }
+  .tut-card{ max-width: 580px; }
+  .tut-pickrow{ display:flex; align-items:center; gap:10px; margin-bottom:9px; flex-wrap:wrap; }
+  .tut-pick-label{
+    font-family:'Oswald',sans-serif; font-size:10px; letter-spacing:.16em;
+    text-transform:uppercase; color:var(--brass-dim); width:50px; flex-shrink:0;
+  }
+  .tut-roots{ display:flex; gap:4px; flex-wrap:wrap; }
+  .tut-root, .tut-qual{
+    font-family:'Share Tech Mono',monospace; font-size:12px;
+    background:var(--panel); color:var(--cream-dim);
+    border:1.5px solid var(--panel-line); border-radius:6px;
+    padding:6px 9px; cursor:pointer; min-width:30px;
+  }
+  .tut-root:hover, .tut-qual:hover{ border-color:var(--brass-dim); color:var(--cream); }
+  .tut-root:focus-visible, .tut-qual:focus-visible{ outline:2px solid var(--screen-trace); outline-offset:2px; }
+  .tut-root.on, .tut-qual.on{
+    background:linear-gradient(180deg,var(--brass-fill-top),var(--brass-fill-bot));
+    color:var(--ink); font-weight:700; border-color:transparent;
+  }
+  .tut-strip{ display:flex; gap:3px; margin:16px 0 14px; }
+  .tut-cell{
+    flex:1; min-width:0; position:relative;
+    border:1.5px solid var(--panel-line); border-radius:5px;
+    background:var(--panel); color:var(--cream-dim);
+    font-family:'Share Tech Mono',monospace; font-size:11px;
+    text-align:center; padding:17px 0 7px;
+  }
+  .tut-cell.black{ background:#E7DABB; }
+  .tut-cell .tut-deg{
+    position:absolute; top:3px; left:0; right:0;
+    font-size:8px; letter-spacing:.06em; color:var(--brass-dim);
+  }
+  .tut-cell.count{ border-color:var(--brass-dim); color:var(--cream); }
+  .tut-cell.count .tut-deg{ color:var(--brass-bright); font-weight:700; }
+  .tut-cell.tone-root{ border-color:var(--brass-bright); color:var(--brass-bright); box-shadow:0 0 10px rgba(240,201,104,.35); font-weight:700; }
+  .tut-cell.tone-3rd{ border-color:var(--tier-rare); color:var(--tier-rare); box-shadow:0 0 9px rgba(79,163,227,.3); font-weight:700; }
+  .tut-cell.tone-5th{ border-color:var(--led-green); color:var(--led-green); box-shadow:0 0 9px var(--led-green-glow); font-weight:700; }
+  .tut-cell.tone-root .tut-deg{ color:var(--brass-bright); }
+  .tut-cell.tone-3rd .tut-deg{ color:var(--tier-rare); }
+  .tut-cell.tone-5th .tut-deg{ color:var(--led-green); }
+  .tut-step{
+    background:var(--panel); border:1px solid var(--panel-line); border-radius:8px;
+    padding:12px 14px; margin-bottom:14px;
+  }
+  .tut-step-head{ display:flex; justify-content:space-between; align-items:baseline; margin-bottom:6px; gap:10px; }
+  .tut-step-no{ font-family:'Oswald',sans-serif; font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:var(--brass-dim); }
+  .tut-step-title{ font-family:'Oswald',sans-serif; font-size:14px; text-transform:uppercase; letter-spacing:.05em; color:var(--brass-bright); }
+  .tut-step-body{ margin:0; font-size:14px; line-height:1.55; color:var(--cream); }
+  .tut-step-body b{ color:var(--brass-bright); }
+  .tut-foot{ display:flex; gap:8px; align-items:center; }
+  .tut-foot .btn{ flex:1; }
+  .tut-cheat{
+    text-align:center; font-family:'Oswald',sans-serif; font-size:11px;
+    letter-spacing:.04em; color:var(--brass-dim); margin:12px 0 0;
+  }
+  @media (max-width: 480px){
+    .tut-cell{ font-size:9px; padding:15px 0 6px; }
+    .tut-cell .tut-deg{ font-size:7px; }
+  }
+
   .armory-grid{
     display:grid;
     grid-template-columns: repeat(auto-fill, minmax(92px, 1fr));
@@ -691,6 +754,10 @@
       together &mdash; pick whichever one correctly spells the chord you're building. Press <b>Test My Chord</b>
       to check &mdash; get it right and your knight lands a hit on the foe; get it wrong and the foe hits back.
     </p>
+
+    <div class="howto-actions">
+      <button class="btn secondary" id="tutorialBtn" type="button">&#128218; New here? Learn to build a chord step by step</button>
+    </div>
 
     <div class="settings-panel">
       <div class="settings-head">
@@ -791,6 +858,7 @@
           <button class="btn" id="testBtn" type="button">Test My Chord</button>
           <button class="btn secondary" id="clearBtn" type="button">Clear</button>
           <button class="btn secondary" id="formulaBtn" type="button">Formulas</button>
+          <button class="btn secondary" id="tutorialBtnGame" type="button">&#128218; Learn</button>
         </div>
         <button class="btn secondary" id="endSessionBtn" type="button">End Session</button>
       </div>
@@ -850,6 +918,48 @@
       <button class="btn secondary" id="formulaCloseBtn" type="button">Close</button>
     </div>
     <div id="formulaList"></div>
+  </div>
+</div>
+
+<div class="end-overlay" id="tutorialOverlay">
+  <div class="armory-card tut-card">
+    <div class="armory-head">
+      <div>
+        <h2>Build a Chord &mdash; Step by Step</h2>
+        <div class="armory-sub">Major &amp; minor triads, from the root up</div>
+      </div>
+      <button class="btn secondary" id="tutorialCloseBtn" type="button">Close</button>
+    </div>
+
+    <div class="tut-pickrow">
+      <span class="tut-pick-label">Root</span>
+      <div class="tut-roots" id="tutRoots"></div>
+    </div>
+    <div class="tut-pickrow">
+      <span class="tut-pick-label">Quality</span>
+      <div class="tut-roots" id="tutQuals">
+        <button class="tut-qual on" data-q="major" type="button">Major</button>
+        <button class="tut-qual" data-q="minor" type="button">Minor</button>
+      </div>
+    </div>
+
+    <div class="tut-strip" id="tutStrip"></div>
+
+    <div class="tut-step">
+      <div class="tut-step-head">
+        <span class="tut-step-no" id="tutStepNo">Step 1 / 4</span>
+        <span class="tut-step-title" id="tutStepTitle">The Root</span>
+      </div>
+      <p class="tut-step-body" id="tutStepBody"></p>
+    </div>
+
+    <div class="tut-foot">
+      <button class="btn secondary" id="tutBack" type="button">&lsaquo; Back</button>
+      <button class="btn secondary" id="tutPlay" type="button">&#9654; Hear it</button>
+      <button class="btn" id="tutNext" type="button">Next &rsaquo;</button>
+    </div>
+
+    <p class="tut-cheat">Major 3rd = 4 half-steps &middot; minor 3rd = 3 &middot; Perfect 5th = 7 (both)</p>
   </div>
 </div>
 
@@ -1586,6 +1696,84 @@
     ellipsePath(ctx2d, pose.hand[0]*s, pose.hand[1]*s, 1.9*s, 1.9*s, GB.dark);
   }
 
+  // ---- Pixel-art knight (faces right, toward the foe) ----
+  //  Drawn on a 22x30 cell grid, bottom-centre anchored. The weapon arm's hand
+  //  cell is (19,16) low / (19,6) high; pxWeapon draws from there.
+  function PXHERO(P, o){
+    o = o || {};
+    const tt = o.t || 0, hi = o.arm === 'high';
+    const O='#0d1016', SD='#454f5a', SM='#79868f', SL='#c0ccd4',
+          CP='#b23636', CD='#631d1d', GD='#d8a63c', GL='#f2d27a',
+          VG='#6fe08a', BT='#221a14';
+    P.OUT = O;
+    // cape behind, flaring screen-left; sways + kicks on a lunge
+    const cf = (o.flash ? 0 : Math.sin(tt * 2.1) * 1.2) + (o.capeKick || 0);
+    P.tri(10, 10, 3 - cf, 14, 5 - cf, 27, CD);
+    P.tri(10, 10, 5 - cf, 27, 10, 24, CP);
+    P.px(4 - Math.round(cf), 27, CD); P.px(6 - Math.round(cf), 28, CD);
+    // legs / greaves
+    P.rect(8, 21, 3, 8, O);  P.rect(8, 22, 3, 6, SD);  P.col(9, 22, 27, SM);
+    P.rect(12, 21, 3, 8, O); P.rect(12, 22, 3, 6, SD); P.col(13, 22, 27, SM);
+    P.rect(7, 29, 5, 3, BT); P.rect(12, 29, 5, 3, BT);   // boots
+    // torso -- narrow, tall
+    P.rect(7, 10, 9, 12, O);
+    P.rect(8, 11, 7, 10, SD);
+    P.rect(8, 11, 3, 10, SM);        // lit left half
+    P.col(9, 11, 19, SL);            // highlight edge
+    P.row(16, 9, 14, GD);            // belt
+    P.col(11, 12, 15, GL);           // gold placket
+    // pauldrons + neck
+    P.ell(8, 11, 2, 2, SD); P.ell(15, 11, 2, 2, GD); P.px(15, 10, GL);
+    P.rect(10, 8, 3, 2, SD);
+    // helmet
+    P.ell(11, 5, 4, 4, O);
+    P.ell(11, 5, 3, 3, SD);
+    P.ell(10, 4, 2, 2, SM);
+    P.rect(12, 4, 3, 2, '#04100a');  // visor slit
+    P.px(14, 4, o.flash ? '#ffdada' : (Math.sin(tt * 3) > 0 ? '#b8ffce' : VG));
+    P.tri(11, -1, 10, 3, 12, 3, GD); P.px(9, 2, GL); P.px(13, 1, GD);   // crest
+    // far arm at the side
+    P.rect(6, 12, 2, 6, SD);
+    // near (weapon) arm reaching to the hand cell
+    const hx = 19, hy = hi ? 6 : 16;
+    P.line(15, 12, hx, hy, SD); P.line(15, 13, hx, hy + 1, SM);
+    P.ell(hx, hy, 1, 1, SL);
+  }
+
+  function pxWeapon(P, type, tier, hx, hy, swing){
+    const TCOL = { common:'#c9d2d8', rare:'#8fc4ef', epic:'#c79af0', legendary:'#f2d27a' };
+    const bl = TCOL[tier] || TCOL.common, GR = '#5a4326', O = '#0f1218';
+    P.OUT = O;
+    const ang = -1.4 + swing * 1.7;                 // 0 = pointing up, grows toward forward
+    const ux = Math.sin(ang), uy = -Math.cos(ang);
+    const at = (d)=> [Math.round(hx + ux * d), Math.round(hy + uy * d)];
+    let len = 11, thick = 1;
+    if(type === 'dagger') len = 6;
+    else if(type === 'rapier') len = 12;
+    else if(type === 'claymore'){ len = 16; thick = 2; }
+    else if(type === 'mace') len = 8;
+    else if(/spear|halberd|trident|scepter|axe/.test(type)) len = 17;
+    if(tier === 'epic') len += 2;
+    if(tier === 'legendary') len += 4;
+    // grip + guard
+    const g0 = at(-2), g1 = at(1);
+    P.line(g0[0], g0[1], g1[0], g1[1], GR);
+    const gp = at(1);
+    P.line(gp[0] - 1, gp[1], gp[0] + 1, gp[1], tier === 'common' ? '#8a929a' : bl);
+    // shaft / blade
+    for(let d = 2; d <= len; d++){
+      const p = at(d);
+      P.px(p[0], p[1], bl);
+      if(thick > 1 && d < len - 1) P.px(p[0] + 1, p[1], bl);
+    }
+    const tp = at(len + 1); P.px(tp[0], tp[1], '#ffffff');
+    if(type === 'mace'){ const hp = at(len); P.ell(hp[0], hp[1], 2, 2, bl); }
+    else if(type === 'axe' || type === 'halberd'){ const hp = at(len - 4); P.tri(hp[0], hp[1] - 3, hp[0] + 4, hp[1], hp[0], hp[1] + 3, bl); }
+    else if(type === 'trident'){ const hp = at(len); P.px(hp[0] + 2, hp[1] - 1, bl); P.px(hp[0] - 2, hp[1] - 1, bl); }
+    else if(type === 'scepter'){ const hp = at(len); P.ell(hp[0], hp[1], 2, 2, bl); P.px(hp[0], hp[1], '#ffffff'); }
+    if(tier === 'legendary'){ const hp = at(Math.round(len * 0.6)); P.px(hp[0] + 1, hp[1], '#fff2c0'); }
+  }
+
   function drawHero(ctx2d, w, h, groundY, idleBob, now){
     let dx = 0, dy = 0, alpha = 1, rot = 0, scale = 1, flash = false;
     let crouch = 0;   // small vertical dip for attack anticipation
@@ -1621,50 +1809,46 @@
       rot = Math.sin(now/1000*1.7) * 0.025; // gentle idle sway
     }
 
-    const BODY_SCALE = 1.55;
+    const HD = SCENE_LP * 1.5;                          // hero pixel-cell size
+    const GW = 22, GH = 32;
     const baseX = w*0.24, baseY = groundY + (reducedMotion ? 0 : idleBob*0.4);
+    const footX = baseX + dx, footY = baseY + dy + crouch;
 
-    // contact shadow -- world space, stays flat on the ground
-    const shW = 30 - Math.abs(dx) * 0.05;
-    drawGroundShadow(ctx2d, baseX + dx*0.5, groundY + 3, Math.max(12, shW), 6, alpha * 0.42);
-
-    ctx2d.save();
-    ctx2d.globalAlpha = alpha;
-    ctx2d.translate(baseX+dx, baseY+dy+crouch);
-    ctx2d.rotate(rot);
-    ctx2d.scale(scale, scale);
-    const c = flash ? '#E2574C' : KNIGHT_PAL.bright;
-    const body = flash ? '#E2574C' : KNIGHT_PAL.mid;
-    const dark = flash ? '#7a231d' : KNIGHT_PAL.dark;
+    drawPixelShadow(ctx2d, baseX + dx*0.5, groundY, 9, HD, alpha * 0.42);
 
     const weapon = equippedWeapon();
-    const poseName = WEAPON_TYPE_TO_POSE[weapon.type] || 'guard';
-    const pose = KNIGHT_POSES[poseName];
-    const capeKick = flash ? 0 : (attacking ? Math.min(1, elapsed/STATE_DURATIONS.heroAttack) * 6 : 0);
+    const hi = (WEAPON_TYPE_TO_POSE[weapon.type] || 'guard') === 'twohand'
+      || /spear|halberd|trident|axe|scepter/.test(weapon.type);
+    const swing = attacking
+      ? easeOutQuad(clamp01((elapsed/STATE_DURATIONS.heroAttack - 0.22) / 0.55))
+      : 0;
+    const fallen = (battle.state === 'heroDown' || battle.state === 'gameOver' || battle.state === 'heroRevive');
 
-    drawKnightBody(ctx2d, body, c, BODY_SCALE, dark, now/1000, capeKick, flash);
-    drawKnightArm(ctx2d, pose, body, BODY_SCALE);
+    const P = makePixCtx(ctx2d, footX, footY, GW, GH, HD, {
+      flash: flash, mirror: false, sqx: scale, sqy: scale,
+      dissolve: fallen ? Math.min(0.75, 1 - alpha) : 0
+    });
+    PXHERO(P, {
+      t: now/1000, flash: flash, arm: hi ? 'high' : 'low',
+      capeKick: attacking ? Math.min(1, elapsed/STATE_DURATIONS.heroAttack) * 4 : 0
+    });
 
-    if(weapon.type !== 'fists'){
-      const handX = pose.hand[0]*BODY_SCALE, handY = pose.hand[1]*BODY_SCALE;
-      const ex = pose.elbow[0]*BODY_SCALE, ey = pose.elbow[1]*BODY_SCALE;
-      const restAngle = Math.atan2(-(handX-ex), handY-ey);
-      const attackDelta = attacking ? -1.05 * easeOutQuad(Math.min(1, elapsed/STATE_DURATIONS.heroAttack)) : 0;
-      const ang = restAngle + attackDelta;
-      drawWeapon(ctx2d, weapon, handX, handY, ang, now);
-
-      // capture the blade tip for the swing smear
+    const hx = 19, hy = hi ? 6 : 16;
+    if(weapon.type === 'fists'){
+      P.OUT = '#0d1016';
+      P.rect(18, 15, 3, 4, '#0d1016');
+      P.rect(18, 15, 3, 3, '#454f5a');
+      P.px(18, 15, '#79868f'); P.px(19, 15, '#79868f');   // knuckle glint
+    } else {
+      pxWeapon(P, weapon.type, weapon.tier, hx, hy, swing);
       if(attacking && !reducedMotion){
-        const L = 30 * BODY_SCALE * (TIER_SCALE[weapon.tier] || 1);
-        const tlx = handX - L*Math.sin(ang), tly = handY + L*Math.cos(ang);
-        const wx = baseX + dx + (tlx*Math.cos(rot) - tly*Math.sin(rot)) * scale;
-        const wy = baseY + dy + crouch + (tlx*Math.sin(rot) + tly*Math.cos(rot)) * scale;
+        const ang = -1.4 + swing * 1.7, L = 13;
+        const wx = footX - GW*HD/2 + (hx + Math.sin(ang)*L) * HD;
+        const wy = footY - GH*HD + (hy - Math.cos(ang)*L) * HD;
         battle.bladeTrail.push({ x: wx, y: wy });
         if(battle.bladeTrail.length > 7) battle.bladeTrail.shift();
       }
     }
-
-    ctx2d.restore();
 
     if(!attacking && battle.bladeTrail.length){ battle.bladeTrail.shift(); }
   }
@@ -2222,7 +2406,8 @@
     const P = { W: gridW, H: gridH, OUT: '#000000', ghost: false };
     P._cell = function(cx, cy, col){
       cx = Math.round(cx); cy = Math.round(cy);
-      if(cx < 0 || cy < 0 || cx >= gridW || cy >= gridH) return;
+      // small margin so a weapon/limb can extend past the nominal grid
+      if(cx < -6 || cy < -6 || cx >= gridW + 24 || cy >= gridH + 6) return;
       if(P.ghost && ((cx + cy) & 1)) return;
       if(diss && ((((cx * 7 + cy * 13) & 15) / 15) < diss)) return;
       ctx2d.fillStyle = flash ? (col === P.OUT ? '#5a1a15' : '#ff6f5c') : col;
@@ -2245,6 +2430,8 @@
       let err = dx2 - dy2;
       for(;;){ P._cell(x0, y0, col); if(x0 === x1 && y0 === y1) break; const e2 = 2 * err; if(e2 > -dy2){ err -= dy2; x0 += sxx; } if(e2 < dx2){ err += dx2; y0 += syy; } }
     };
+    P.col = function(x, y0, y1, col){ for(let y = y0; y <= y1; y++) P._cell(x, y, col); };
+    P.row = function(y, x0, x1, col){ for(let x = x0; x <= x1; x++) P._cell(x, y, col); };
     P.tri = function(ax, ay, bx, by, cx, cy, col){
       const minY = Math.min(ay, by, cy), maxY = Math.max(ay, by, cy);
       for(let y = minY; y <= maxY; y++){
@@ -2277,16 +2464,19 @@
       P.line(3,16,20,16,O);
     },
     flat_fiend: function(P, t){
-      const O='#25400f', D1='#4a6b1c', M='#7bb03a', L='#c6ef7a', E='#101c06';
+      const O='#22400d', D1='#4a6b1c', M='#7bb03a', L='#c6ef7a', E='#0b1305', TE='#eef7d6';
       P.OUT=O;
-      P.line(7,0,7,2,O); P.line(18,0,18,2,O);        // antenna stalks
-      P.ell(13,8,12,5,O);
+      P.line(7,0,8,3,O); P.line(18,0,17,3,O);                 // twitchy antennae
+      P.ell(13,8,12,5,O);                                      // flat wide body
       P.ell(13,8,11,4,D1);
       P.ell(13,7,9,3,M);
-      P.line(3,5,23,5,L);
-      P.rect(9,7,2,3,E); P.rect(15,7,2,3,E);
-      P.px(9,7,glowCol('#d6ffa0',t)); P.px(16,7,glowCol('#d6ffa0',t));
-      P.px(10,11,O); P.line(11,12,15,12,O); P.px(16,11,O);   // downturned mouth
+      P.line(4,5,22,5,L);
+      P.line(7,6,10,7,O); P.line(16,7,19,6,O);                 // angry brow
+      P.rect(9,7,2,2,E); P.rect(15,7,2,2,E);
+      P.px(9,7,glowCol('#e6ffb0',t)); P.px(16,7,glowCol('#e6ffb0',t));
+      for(let i=0;i<7;i++) P.px(9+i, 10 + (i&1?0:1), (i&1)?TE:O);  // jagged grin
+      P.px(8,10,O); P.px(17,10,O);
+      P.px(1,9,D1); P.px(25,9,D1);                             // stub arms
     },
     muddy_muddler: function(P, t){
       const O='#241705', D1='#4a3416', M='#7c5a2c', L='#ac8848', DK='#160f04';
@@ -2301,17 +2491,23 @@
       P.line(3,17,18,17,O);
     },
     sour_bat: function(P, t){
-      const O='#1c1030', D1='#3f2565', M='#6a45a0', L='#a882d8', E='#0a0816', F='#f2e6ff';
+      const O='#1a0f2c', D1='#3f2565', M='#7a52b0', L='#b79ae0', E='#0a0816', F='#ffffff';
       P.OUT=O;
-      P.tri(9,9,0,1,3,14,O); P.tri(17,9,26,1,23,14,O);       // big angular wings
-      P.tri(9,9,2,4,4,12,M); P.tri(17,9,24,4,22,12,M);
-      P.px(1,5,O); P.px(2,9,O); P.px(24,5,O); P.px(23,9,O);   // wing points
-      P.tri(9,3,7,8,12,8,O); P.tri(17,3,19,8,14,8,O);          // pointed ears
-      P.ell(13,9,5,5,O);
-      P.ell(13,9,4,4,D1);
-      P.ell(13,8,3,2,M);
-      P.rect(10,8,2,2,glowCol('#ffdf5a',t)); P.rect(15,8,2,2,glowCol('#ffdf5a',t));
-      P.px(11,13,F); P.px(15,13,F); P.px(13,14,O);
+      // membrane wings, clearly clear of the body
+      P.tri(8,7,0,2,3,13,O); P.tri(0,2,3,13,7,10,O);
+      P.tri(20,7,28,2,25,13,O); P.tri(28,2,25,13,21,10,O);
+      P.tri(8,7,1,4,4,11,M); P.tri(20,7,27,4,24,11,M);
+      P.line(2,3,4,8,D1); P.line(4,8,3,12,D1);
+      P.line(26,3,24,8,D1); P.line(24,8,25,12,D1);
+      // ears
+      P.tri(10,3,9,8,13,8,O); P.tri(18,3,15,8,19,8,O);
+      P.tri(10,4,10,8,12,8,M); P.tri(18,4,16,8,18,8,M);
+      // head / body
+      P.ell(14,9,5,5,O);
+      P.ell(14,9,4,4,D1);
+      P.ell(14,8,3,2,M);
+      P.rect(11,8,2,2,glowCol('#ffe14a',t)); P.rect(16,8,2,2,glowCol('#ffe14a',t));
+      P.px(12,12,F); P.px(16,12,F); P.px(14,13,O);
     },
     screeching_owlbat: function(P, t){
       const O='#241804', D1='#4c3717', M='#7d5f2e', L='#c6a662', E='#0d0a05', W='#f4ecd8', BK='#e0a53c';
@@ -2342,19 +2538,22 @@
       P.line(3,20,13,20,O);
     },
     grating_goblin: function(P, t){
-      const O='#1e2a0c', D1='#3f5a1c', M='#6e8a3e', L='#a6c46a', E='#0c1305', MET='#9aa0a6', MD='#5a5f66';
+      const O='#1c2a0a', D1='#3f5a1c', M='#6e8a3e', L='#a6c46a', E='#0b1205', MET='#c2c8ce', MD='#6b7178', MH='#0a1004';
       P.OUT=O;
-      P.px(7,0,O); P.px(9,0,O); P.px(11,0,O); P.line(7,1,7,3,O); P.line(9,1,9,3,O); P.line(11,1,11,3,O);
-      P.tri(3,10,0,6,5,12,O); P.tri(15,10,19,6,13,12,O);
-      P.tri(3,10,1,7,5,11,M); P.tri(15,10,17,7,13,11,M);
-      P.ell(9,12,7,7,O);
-      P.ell(9,12,6,6,D1);
-      P.ell(9,11,4,4,M);
-      P.rect(6,10,2,2,glowCol('#e8ffa0',t)); P.rect(10,10,2,2,glowCol('#e8ffa0',t));
-      for(let i=0;i<5;i++) P.px(6+i, 15, (i&1)?E:L);
-      P.rect(13,9,5,8,MD); P.rect(14,10,3,6,MET);
-      for(let gy=0;gy<3;gy++) for(let gx=0;gx<2;gx++) P.px(15+gx,11+gy*2,MD);
-      P.line(2,19,16,19,O);
+      P.line(7,0,7,3,O); P.line(9,0,9,3,O); P.line(11,0,11,3,O);   // head spikes
+      P.tri(3,10,0,5,4,13,O); P.tri(4,10,1,7,4,12,M);              // ears
+      P.tri(14,10,18,5,15,13,O); P.tri(15,10,17,7,15,12,M);
+      P.ell(8,12,6,7,O);
+      P.ell(8,12,5,6,D1);
+      P.ell(8,11,3,4,M);
+      P.rect(5,10,2,2,glowCol('#e8ffa0',t)); P.rect(9,10,2,2,glowCol('#e8ffa0',t));
+      for(let i=0;i<5;i++) P.px(6+i, 15, (i&1)?E:L);               // snaggle teeth
+      P.line(13,13,17,12,O); P.line(13,14,17,13,D1);               // arm reaching out
+      // the grater: plate + handle + punched holes
+      P.rect(16,5,5,11,O); P.rect(17,6,3,9,MD); P.rect(17,6,3,4,MET);
+      P.rect(18,2,1,3,O);                                          // handle
+      for(let gy=0;gy<3;gy++) for(let gx=0;gx<2;gx++) P.px(17+gx*2, 8+gy*2, MH);
+      P.line(2,19,14,19,O);
     },
     static_wisp: function(P, t){
       const O='#0c2530', D1='#1d5266', M='#38879e', L='#8fe0ee', E='#071319', BOLT='#fff2a0';
@@ -2372,20 +2571,18 @@
     _placeholder: null
   };
   PXDRAW.dissonant_drone = function(P, t){
-    const O='#1b1f26', D1='#3c414b', M='#7c848f', L='#bcc2cc', E='#0d1015', RED='#e2574c';
+    const O='#161a21', D1='#3a3f49', M='#828a96', L='#c2c8d2', E='#0b0e13', RED='#e2574c';
     P.OUT=O;
-    P.line(6,1,18,1,D1); P.line(6,1,6,5,D1); P.line(18,1,18,5,D1);   // band
-    P.rect(0,5,5,9,O); P.rect(19,5,5,9,O);                            // ear cups
-    P.rect(1,6,3,7,D1); P.rect(20,6,3,7,D1);
-    P.px(2,9,L); P.px(21,9,L);
-    P.ell(12,9,6,6,O);                                                // bigger head
-    P.ell(12,9,5,5,D1);
-    P.ell(12,8,4,3,M);
-    P.ell(11,6,3,1,L);
-    P.line(9,7,11,10,E); P.line(11,7,9,10,E);                         // X eyes
-    P.line(14,7,16,10,E); P.line(16,7,14,10,E);
-    P.rect(11,12,3,2,RED);                                            // buzzing mouth
-    P.px(12,0,L);
+    P.line(6,0,17,0,L); P.line(6,0,5,4,L); P.line(17,0,18,4,L);       // headphone band
+    P.rect(0,4,5,10,O); P.rect(19,4,5,10,O);                          // ear cups
+    P.rect(1,5,3,8,D1); P.rect(20,5,3,8,D1);
+    P.rect(1,5,3,3,M); P.rect(20,5,3,3,M);
+    P.ell(12,9,6,6,O);                                                // clean round head
+    P.ell(12,9,5,5,M);
+    P.ell(11,6,3,2,L);
+    P.line(8,6,11,9,E); P.line(11,6,8,9,E);                           // bold X eyes
+    P.line(13,6,16,9,E); P.line(16,6,13,9,E);
+    P.rect(10,12,4,2,RED);                                            // buzz mouth
   };
   PXDRAW.warble_wraith = function(P, t){
     const O='#232a4a', D1='#3a4a7a', M='#6272b0', L='#a7b4e6', E='#0d1024';
@@ -2401,18 +2598,24 @@
     P.px(2,11,M); P.px(16,11,M);
   };
   PXDRAW.noise_newt = function(P, t){
-    const O='#1c3410', D1='#39561c', M='#5f8f3e', L='#a6d47a', E='#0c1806', SP='#d6ef9c';
+    const O='#122a09', D1='#33501c', M='#5f8f3e', L='#a6d47a', E='#0b1606', SP='#d6ef9c';
     P.OUT=O;
-    P.ell(12,7,12,3,O);
-    P.ell(21,7,4,3,O);
-    P.line(2,7,0,4,O);
-    P.ell(12,7,11,2,D1);
-    P.ell(21,7,3,2,D1);
-    P.line(4,6,20,6,M);
-    P.px(7,5,SP); P.px(11,6,SP); P.px(15,5,SP);
-    P.line(5,9,5,11,O); P.line(10,9,10,11,O); P.line(16,9,16,11,O); P.line(20,9,20,11,O);
-    P.rect(21,6,2,2,E);
-    P.line(19,8,23,8,O);
+    P.line(1,11,4,10,O); P.line(4,10,6,7,O); P.line(6,7,5,4,O);       // long tail sweeping up
+    P.px(3,11,D1); P.px(5,9,D1);
+    P.ell(13,9,9,4,O);                                                // fat sausage body
+    P.ell(13,9,8,3,D1);
+    P.ell(13,8,6,2,M);
+    P.row(6,8,18,M);                                                  // back stripe
+    P.px(9,5,O); P.px(13,5,O); P.px(16,5,O);                          // spine bumps
+    P.px(10,9,SP); P.px(14,8,SP); P.px(17,9,SP);                      // spots
+    P.line(20,8,22,5,O); P.line(21,8,23,5,O);                         // raised neck
+    P.ell(23,4,3,3,O); P.ell(23,4,2,2,M);                             // lifted head
+    P.px(24,3,glowCol('#ffe27a',t));
+    P.line(22,5,26,5,O); P.px(26,4,O); P.px(26,6,O);                  // snout
+    P.line(8,12,6,15,O); P.line(6,15,4,15,O);                         // bent legs
+    P.line(12,12,11,15,O); P.line(11,15,9,15,O);
+    P.line(16,12,17,15,O); P.line(17,15,19,15,O);
+    P.line(19,11,21,14,O); P.line(21,14,23,14,O);
   };
   PXDRAW.rattling_rattler = function(P, t){
     const O='#3a2c10', D1='#6c5424', M='#b99a4e', L='#f0dfae', E='#1a1206', DI='#5c4a22';
@@ -2429,18 +2632,21 @@
     P.rect(0,7,3,2,L); P.rect(0,10,3,2,L); P.rect(1,13,2,2,L);
   };
   PXDRAW.cacophony_crawler = function(P, t){
-    const O='#2a1c40', D1='#4a367a', M='#7a5ca0', L='#c8b4ef', E='#120c22';
+    const O='#221636', D1='#3f2c66', M='#6b4f96', L='#b9a2e0', E='#100a1e', SP='#d8c4f2';
     P.OUT=O;
-    for(let i=0;i<6;i++){
-      const cx = 4 + i*4;
-      P.tri(cx-2,6,cx+2,6,cx,2,O);
-      P.ell(cx,9,3,3,O);
-      P.ell(cx,9,2,2,(i&1)?D1:M);
-      P.line(cx-1,12,cx-2,14,O); P.line(cx+1,12,cx+2,14,O);
+    P.rect(3,7,22,4,O);                                               // connected body tube
+    P.rect(3,8,22,2,D1);
+    P.line(4,7,24,7,M);
+    for(let i=0;i<6;i++){ const x=5+i*3;
+      P.col(x,7,9,O);                                                 // segment seam
+      P.tri(x,6,x-1,3,x+1,3,O); P.px(x,4,SP);                         // spine tuft
     }
-    P.ell(25,8,3,3,O); P.ell(25,8,2,2,M);
-    P.px(24,7,glowCol('#e8d6ff',t)); P.px(26,7,glowCol('#e8d6ff',t));
-    P.line(27,7,29,6,O); P.line(27,9,29,10,O);
+    for(let i=0;i<7;i++){ const x=4+i*3;
+      P.line(x,11,x-1,14,O); P.line(x,11,x+1,14,O);                   // leg pairs
+    }
+    P.ell(26,9,3,4,O); P.ell(26,9,2,3,M);                             // head
+    P.px(25,7,glowCol('#e8d6ff',t)); P.px(27,7,glowCol('#e8d6ff',t));
+    P.line(28,7,29,5,O); P.line(28,11,29,13,O);                       // mandibles
   };
   PXDRAW.buzzing_beetle = function(P, t){
     const O='#182507', D1='#33501c', M='#4f7b3a', L='#9fdc7a', E='#0a1204', W='#e8ffd4';
@@ -2457,20 +2663,26 @@
     P.line(4,17,3,19,O); P.line(11,18,11,20,O); P.line(18,17,19,19,O);
   };
   PXDRAW.tritone_troll = function(P, t){
-    const O='#2a2013', D1='#4d3a24', M='#836044', L='#b89066', E='#140f08', LC='#5a3a2c';
+    const O='#221909', D1='#43331f', M='#7a5a3a', L='#a9835a', E='#120d07', LC='#4a2f20', TU='#f0e2c6';
     P.OUT=O;
-    P.ell(12,17,10,9,O);                       // torso
-    P.ell(12,17,9,8,D1);
-    P.ell(12,15,6,4,M);
-    P.ell(12,7,4,4,O);                         // head, bigger & sat on shoulders
-    P.ell(12,7,3,3,D1);
-    P.ell(12,6,2,1,L);
-    P.rect(9,7,2,2,glowCol('#ffe6b0',t)); P.rect(13,7,2,2,glowCol('#ffe6b0',t));
-    P.px(9,10,L); P.px(15,10,L);               // tusks
-    P.tri(3,11,8,13,2,21,O); P.ell(3,21,4,4,O); P.ell(3,21,3,3,M);   // huge left fist
-    P.tri(21,13,16,15,22,22,O); P.ell(22,22,3,3,O); P.ell(22,22,2,2,M);
-    P.rect(7,24,4,2,O); P.rect(14,24,4,2,O);   // stumpy feet
-    P.rect(7,19,10,3,LC);                       // loincloth
+    P.ell(14,13,8,6,O);                         // hunched shoulders / back hump
+    P.ell(14,13,7,5,D1);
+    P.ell(13,11,5,3,M);
+    P.ell(13,20,7,6,O);                         // lower torso / belly
+    P.ell(13,20,6,5,D1);
+    P.ell(12,19,4,3,M);
+    P.rect(6,22,14,3,LC);                       // loincloth
+    P.ell(11,9,3,3,O);                          // small head, forward & low
+    P.ell(11,9,2,2,M);
+    P.line(8,8,14,8,O);                         // brow ridge
+    P.px(9,9,glowCol('#ffe6b0',t)); P.px(12,9,glowCol('#ffe6b0',t));
+    P.px(9,11,TU); P.px(13,11,TU);              // up-jutting tusks
+    P.rect(2,12,4,9,O); P.rect(3,13,2,7,M);     // thick left arm...
+    P.ell(3,23,4,4,O); P.ell(3,23,3,3,M); P.px(2,21,L);   // ...giant knuckles
+    P.line(21,12,25,9,O); P.line(22,13,26,10,O);          // right arm cocked back
+    P.ell(26,10,3,3,O); P.ell(26,10,2,2,M);
+    P.rect(7,25,5,3,O); P.rect(8,26,3,2,M);     // squat legs
+    P.rect(15,25,5,3,O); P.rect(16,26,3,2,M);
   };
   PXDRAW.clashing_cleric = function(P, t){
     const O='#33322a', D1='#6e6a5a', M='#a7a290', L='#e4dfc8', E='#12130f', GD='#c6a03f';
@@ -2486,31 +2698,34 @@
     P.line(2,22,12,22,O);
   };
   PXDRAW.chaos_choir = function(P, t){
-    const O='#2e1f3c', D1='#4c3568', M='#7a5ca0', L='#d0b8ef', E='#150c22', MO='#0c0616';
+    const O='#2b1c3a', D1='#4a3466', M='#7a5ca0', L='#cdb4ee', E='#140b22', MO='#0a0416', NT='#e0ccf8';
     P.OUT=O;
-    P.tri(9,1,3,9,15,9,O);
-    P.rect(2,9,15,14,O);
-    P.tri(9,2,4,9,14,9,D1);
-    P.rect(3,9,13,13,D1);
-    P.rect(6,4,6,4,E);
-    P.px(7,6,glowCol('#e8d6ff',t)); P.px(11,6,glowCol('#e8d6ff',t));
-    P.ring(6,12,2,2,MO); P.ring(12,14,2,2,MO); P.ring(8,18,2,1,MO);
-    P.px(6,12,MO); P.px(12,14,MO);
-    P.px(0,11,L); P.px(1,13,L); P.px(17,15,L); P.px(18,17,L);
+    P.tri(9,0,3,9,15,9,O);                                            // hood
+    P.rect(2,9,15,15,O);
+    P.tri(9,1,4,9,14,9,D1);
+    P.rect(3,9,13,14,D1);
+    P.col(4,10,22,M); P.col(11,10,22,M);                              // robe folds
+    P.rect(6,4,6,4,E);                                                // hood face
+    P.px(7,6,glowCol('#e8d6ff',t)); P.px(10,6,glowCol('#e8d6ff',t));
+    // singing maws: tall dark ovals with a pale upper lip
+    [[6,13],[12,15],[8,19]].forEach(function(m){
+      P.ell(m[0],m[1],2,3,MO); P.line(m[0]-1,m[1]-2,m[0]+1,m[1]-2,L);
+    });
+    P.px(0,11,NT); P.px(1,12,NT); P.px(17,14,NT); P.px(18,13,NT); P.px(16,19,NT);  // note motes
   };
   PXDRAW.void_virtuoso = function(P, t){
-    const O='#0d0a18', D1='#221b3a', M='#3d3470', L='#9a86d6', E='#050310', BT='#eaf2ff';
+    const O='#0b0816', D1='#1c1633', M='#332a5e', L='#8f7ccf', E='#040210', BT='#eef4ff', ST='#b9a6ff';
     P.OUT=O;
-    P.tri(9,0,3,10,15,10,O);                    // hood
-    P.rect(2,10,15,13,O);
-    for(let i=0;i<8;i++){ const hh = 1 + ((i*5)%3); for(let k=0;k<hh;k++) P._cell(2 + i*2, 22+k, O); }  // ragged hem
-    P.tri(9,1,4,10,14,10,D1);
-    P.rect(3,10,13,12,D1);
-    P.px(5,13,L); P.px(9,16,L); P.px(13,13,L); P.px(7,19,L); P.px(11,20,L); P.px(6,15,M); P.px(12,18,M);  // void motes
-    P.rect(6,6,6,3,E);                          // face void
-    P.px(7,7,glowCol('#c4b0ff',t)); P.px(10,7,glowCol('#c4b0ff',t));
-    P.line(15,10,17,7,D1);                      // raised arm
-    P.line(17,7,23,1,BT); P.px(23,0,'#ffffff'); P.px(22,1,'#ffffff'); P.px(24,1,BT);  // baton + spark
+    P.tri(10,0,4,9,16,9,O);                                           // hood
+    P.tri(10,1,5,9,15,9,D1);
+    const edge=[6,4,7,5,8,6,7,8,6,7,8,6,9,7,10];                      // jagged cloak silhouette
+    for(let r=0;r<15;r++){ const e=edge[r]; P.rect(10-e, 9+r, e*2, 1, O); P.rect(11-e, 9+r, Math.max(0,e*2-2), 1, D1); }
+    for(let i=0;i<6;i++){ const x=3+i*4, hh=1+((i*7)%3); for(let k=0;k<hh;k++) P._cell(x,24+k,O); }  // ragged points
+    [[7,13],[12,16],[9,20],[14,12],[6,18],[13,22]].forEach(function(p){ P.px(p[0],p[1],ST); });      // star motes
+    P.rect(7,5,7,3,E);                                                // face slit
+    P.px(8,6,glowCol('#c9b6ff',t)); P.px(12,6,glowCol('#c9b6ff',t));
+    P.line(16,10,19,6,D1); P.line(19,6,24,0,BT);                      // raised baton
+    P.px(24,0,'#ffffff'); P.px(23,1,'#ffffff'); P.px(20,5,ST);
   };
   PXDRAW.sharp_specter = function(P, t){
     const O='#1e3550', D1='#37566b', M='#5f89a6', L='#cfeaff', E='#0b1a28';
@@ -2527,19 +2742,22 @@
     P.px(9,10,glowCol('#eaf6ff',t)); P.px(13,10,glowCol('#eaf6ff',t));
   };
   PXDRAW.howling_horror = function(P, t){
-    const O='#1c2440', D1='#2c3358', M='#4a5688', L='#aab6e6', E='#0b1024', MO='#05081a';
+    const O='#151d38', D1='#28304f', M='#454f7e', L='#a9b4e0', E='#0a1022', MO='#04061a', RIM='#7c88bd';
     P.OUT=O;
-    P.ell(14,12,13,11,O);
-    P.rect(2,12,25,10,O);
-    const hem = [4,2,6,3,5,2,7,4,5,3];
-    for(let i=0;i<10;i++) for(let k=0;k<hem[i];k++) P._cell(3 + i*2, 22 + k, O);
-    P.ell(14,12,12,10,D1);
-    P.rect(3,12,23,9,D1);
-    P.ghost=true; P.ell(14,10,9,7,M); P.ghost=false;
-    P.ell(9,10,2,2,O); P.ell(19,10,2,2,O);
-    P.px(9,10,glowCol('#dfe8ff',t)); P.px(19,10,glowCol('#dfe8ff',t));
-    P.ring(14,16,4,4,MO); P.ell(14,16,3,3,MO);
-    P.px(1,14,M); P.px(27,14,M);
+    P.ell(15,12,14,11,O);                                             // billowing shroud
+    P.rect(2,12,27,11,O);
+    P.ell(15,12,13,10,D1);
+    P.rect(3,12,25,10,D1);
+    P.ghost=true; P.ell(15,10,10,7,M); P.ghost=false;
+    const hem=[3,6,2,7,4,8,3,6,2,5,3];
+    for(let i=0;i<11;i++){ const x=4+i*2; for(let k=0;k<hem[i];k++) P._cell(x, 22+k, (k>hem[i]-2)?O:D1); }  // tendril hem
+    P.ell(10,10,2,2,O); P.ell(20,10,2,2,O);
+    P.rect(9,9,3,3,glowCol('#e6ecff',t)); P.rect(19,9,3,3,glowCol('#e6ecff',t));  // big glowing eyes
+    // screaming maw -- tapered irregular dark hole
+    P.tri(15,13,11,15,19,15,MO);
+    P.rect(12,15,7,4,MO);
+    P.tri(12,19,19,19,15,23,MO);
+    P.line(12,14,18,14,RIM); P.px(11,15,RIM); P.px(19,15,RIM);
   };
 
   // Blit the pixel monster for `id` at the given foot position (logical coords).
@@ -2547,11 +2765,11 @@
     const draw = PXDRAW[id] || PXDRAW.discord_slime;
     // grid sizes match the coordinates each PXDRAW paints within
     const SIZES = {
-      discord_slime:[24,17], flat_fiend:[26,13], muddy_muddler:[22,18], sour_bat:[27,15],
-      screeching_owlbat:[24,20], offkey_imp:[16,21], grating_goblin:[20,20], static_wisp:[18,18],
-      dissonant_drone:[24,15], warble_wraith:[18,19], noise_newt:[26,13], rattling_rattler:[27,16],
-      cacophony_crawler:[30,15], buzzing_beetle:[22,21], tritone_troll:[25,26], clashing_cleric:[16,23],
-      chaos_choir:[18,24], void_virtuoso:[25,26], sharp_specter:[22,22], howling_horror:[28,27]
+      discord_slime:[24,17], flat_fiend:[27,14], muddy_muddler:[22,18], sour_bat:[29,15],
+      screeching_owlbat:[24,20], offkey_imp:[16,21], grating_goblin:[23,20], static_wisp:[18,18],
+      dissonant_drone:[24,16], warble_wraith:[18,19], noise_newt:[28,16], rattling_rattler:[27,16],
+      cacophony_crawler:[30,15], buzzing_beetle:[22,21], tritone_troll:[30,29], clashing_cleric:[16,23],
+      chaos_choir:[18,24], void_virtuoso:[26,26], sharp_specter:[22,22], howling_horror:[30,27]
     };
     const gs = SIZES[id] || [24,20];
     const P = makePixCtx(ctx2d, footX, footY, gs[0], gs[1], D, opts);
@@ -2622,7 +2840,7 @@
     const tint = MONSTER_TINT[id] || '#8FA0D9';
 
     // one pixel-sprite cell, in logical units -- bumped up for these small foes
-    const D = SCENE_LP * 1.35 * espec * menace;
+    const D = SCENE_LP * 1.5 * espec * menace;
 
     // dissolve on death instead of a fade
     const diss = battle.state === 'enemyDefeat'
@@ -2730,7 +2948,7 @@
 
   // 4x4 Bayer matrix (0..15) for ordered dithering the sky bands
   const BAYER4 = [0,8,2,10, 12,4,14,6, 3,11,1,9, 15,7,13,5];
-  const SKY_RAMP = [[12,10,26],[20,15,38],[30,21,51],[46,26,56],[67,34,58],[92,46,60]];
+  const SKY_RAMP = [[34,30,58],[52,44,80],[74,54,96],[108,64,100],[152,84,98],[198,120,104]];
 
   // The dithered sky never changes between frames -- bake it once per buffer size.
   let skyCache = null, skyCacheKey = '';
@@ -2800,31 +3018,42 @@
     ctx2d.fillRect(mx - 4*D, my + 2*D, D, D);
 
     // ---- parallax ridges ----
-    drawRidge(ctx2d, RIDGE_FAR,  w, groundY + D,   h*0.28, '#201933', drift * 3);
-    drawRidge(ctx2d, RIDGE_MID,  w, groundY + 2*D, h*0.42, '#291630', drift * 7);
-    drawRidge(ctx2d, RIDGE_NEAR, w, groundY + 3*D, h*0.58, '#180E1E', drift * 13);
+    drawRidge(ctx2d, RIDGE_FAR,  w, groundY + D,   h*0.28, '#4a4068', drift * 3);
+    drawRidge(ctx2d, RIDGE_MID,  w, groundY + 2*D, h*0.42, '#3a3054', drift * 7);
+    drawRidge(ctx2d, RIDGE_NEAR, w, groundY + 3*D, h*0.58, '#2b2442', drift * 13);
 
     // ---- ground: two flat bands + a dithered seam ----
-    ctx2d.fillStyle = '#241813';
+    ctx2d.fillStyle = '#3c2d23';
     ctx2d.fillRect(0, groundY, w, h - groundY);
-    ctx2d.fillStyle = '#160F0D';
+    ctx2d.fillStyle = '#261b16';
     ctx2d.fillRect(0, px(groundY + (h-groundY)*0.45), w, h);
     for(let bx = 0; bx < w; bx += D){
       if(((bx/D)&1) === 0) continue;
-      ctx2d.fillStyle = '#160F0D';
+      ctx2d.fillStyle = '#261b16';
       ctx2d.fillRect(bx, px(groundY + (h-groundY)*0.45) - D, D, D);
     }
+    // lit apron just below the horizon -- dithered, fading with depth
+    for(let by = 0; by < 7*D; by += D){
+      const depth = by / D;
+      for(let bx = 0; bx < w; bx += D){
+        const th = BAYER4[((by/D)&3)*4 + ((bx/D)&3)] / 16;
+        if(th > depth / 7){
+          ctx2d.fillStyle = '#4e3c2f';
+          ctx2d.fillRect(bx, px(groundY + D + by), D + 0.6, D + 0.6);
+        }
+      }
+    }
     // lit rim at the horizon
-    ctx2d.fillStyle = '#5A3A34';
+    ctx2d.fillStyle = '#7c5548';
     ctx2d.fillRect(0, groundY, w, D);
-    ctx2d.fillStyle = '#7A4A40';
+    ctx2d.fillStyle = '#a8705a';
     for(let bx = 0; bx < w; bx += 2*D){ ctx2d.fillRect(bx, groundY, D, D); }
 
     // ---- pebbles ----
     for(let i=0;i<PEBBLES.length;i++){
       const p = PEBBLES[i];
       const py = px(groundY + 3*D + p.y * (h - groundY - 5*D));
-      ctx2d.fillStyle = p.shade > 0.5 ? '#2E211B' : '#100A09';
+      ctx2d.fillStyle = p.shade > 0.5 ? '#574332' : '#1c130f';
       ctx2d.fillRect(px(p.x * w), py, D * (p.w > 2 ? 2 : 1), D);
     }
 
@@ -2924,10 +3153,10 @@
       mainCtx.fillRect(0,0,w,h);
     }
 
-    // vignette (full-res, smooth)
-    const vig = mainCtx.createRadialGradient(w/2, h*0.55, h*0.25, w/2, h*0.55, h*0.95);
+    // vignette (full-res, smooth) -- light touch so the scene stays open
+    const vig = mainCtx.createRadialGradient(w/2, h*0.55, h*0.30, w/2, h*0.55, h*1.0);
     vig.addColorStop(0, 'rgba(0,0,0,0)');
-    vig.addColorStop(1, 'rgba(0,0,0,0.45)');
+    vig.addColorStop(1, 'rgba(0,0,0,0.26)');
     mainCtx.fillStyle = vig;
     mainCtx.fillRect(0,0,w,h);
 
@@ -2963,7 +3192,6 @@
 
     scopeRAF = requestAnimationFrame(drawBattle);
   }
-  window.__px = { blitMonster: blitMonster, ENEMIES: ENEMIES, drawPixelShadow: drawPixelShadow };
 
   // ---------- Round generation ----------
   let lastRoundKey = null;
@@ -3238,6 +3466,155 @@
       if(!gameOver && sessionActive){ resumeTimer(); nextRound(); }
     }
   }
+
+  // ---------- Step-by-step tutorial (major & minor triads) ----------
+  (function(){
+    const overlay = document.getElementById('tutorialOverlay');
+    if(!overlay) return;
+    const rootsEl   = document.getElementById('tutRoots');
+    const qualsEl   = document.getElementById('tutQuals');
+    const stripEl   = document.getElementById('tutStrip');
+    const stepNoEl  = document.getElementById('tutStepNo');
+    const stepTtlEl = document.getElementById('tutStepTitle');
+    const stepBdyEl = document.getElementById('tutStepBody');
+    const backBtn   = document.getElementById('tutBack');
+    const nextBtn   = document.getElementById('tutNext');
+    const playBtn   = document.getElementById('tutPlay');
+
+    const BLACK_PC = { 1:1, 3:1, 6:1, 8:1, 10:1 };
+    let rootPc = 0, qual = 'major', step = 0;
+
+    const intervalsFor = ()=> qual === 'major' ? [0,4,7] : [0,3,7];
+    const thirdSemi = ()=> qual === 'major' ? 4 : 3;
+    const tones = ()=> spellChord(rootPc, intervalsFor());
+
+    function buildRoots(){
+      rootsEl.innerHTML = '';
+      for(let pc = 0; pc < 12; pc++){
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'tut-root' + (pc === rootPc ? ' on' : '');
+        b.textContent = rootLabel(pc);
+        b.addEventListener('click', ()=>{ rootPc = pc; step = 0; render(); });
+        rootsEl.appendChild(b);
+      }
+    }
+
+    function buildStrip(){
+      stripEl.innerHTML = '';
+      const t = tones();
+      const third = thirdSemi();
+      for(let off = 0; off <= 12; off++){
+        const abs = (rootPc + off) % 12;
+        const cell = document.createElement('div');
+        cell.className = 'tut-cell' + (BLACK_PC[abs] ? ' black' : '');
+        const deg = document.createElement('span');
+        deg.className = 'tut-deg';
+        const nm = document.createElement('span');
+        cell.appendChild(deg); cell.appendChild(nm);
+
+        let name = rootLabel(abs);
+        if(off === 0) name = spellToString(t[0]);
+        else if(off === third && step >= 1) name = spellToString(t[1]);
+        else if(off === 7 && step >= 2) name = spellToString(t[2]);
+        else if(off === 12) name = spellToString(t[0]);
+        nm.textContent = name;
+
+        // permanent tone markers, revealed as the steps progress
+        if(off === 0){ cell.classList.add('tone-root'); deg.textContent = 'ROOT'; }
+        if(step >= 1 && off === third){ cell.classList.add('tone-3rd'); deg.textContent = '3rd'; }
+        if(step >= 2 && off === 7){ cell.classList.add('tone-5th'); deg.textContent = '5th'; }
+        // half-step counters for the step being taught
+        if(step === 1 && off >= 1 && off < third){ cell.classList.add('count'); deg.textContent = String(off); }
+        if(step === 2 && off > third && off < 7){ cell.classList.add('count'); deg.textContent = String(off - third); }
+        stripEl.appendChild(cell);
+      }
+    }
+
+    function render(){
+      buildRoots();
+      Array.prototype.forEach.call(qualsEl.children, (b)=>{
+        b.classList.toggle('on', b.dataset.q === qual);
+      });
+      buildStrip();
+
+      const t = tones();
+      const nm = t.map(spellToString);
+      const rootLetter = t[0].l;
+      const midLetter = LETTERS[(LETTERS.indexOf(rootLetter) + 1) % 7];
+      const midLetter2 = LETTERS[(LETTERS.indexOf(t[1].l) + 1) % 7];
+      const thirdName = qual === 'major' ? 'major 3rd' : 'minor 3rd';
+      const n3 = String(thirdSemi());
+      const from3name = qual === 'major' ? 'minor 3rd' : 'major 3rd';
+      const n5 = String(7 - thirdSemi());
+      const chordName = nm[0] + ' ' + qual;
+
+      const steps = [
+        { title: 'The Root',
+          body: 'Every chord is measured from its <b>root</b>. Here the root is <b>' + nm[0] +
+                '</b>. Find it on the keyboard &mdash; every other note is counted up from this one.' },
+        { title: 'Find the 3rd',
+          body: 'Skip the next letter name (' + rootLetter + ' → <span style="opacity:.55">' + midLetter +
+                '</span> → ' + t[1].l + ') to reach the <b>3rd</b>. Make it a <b>' + thirdName +
+                '</b>: count <b>' + n3 + ' half-steps</b> up from the root. You land on <b>' + nm[1] + '</b>.' },
+        { title: 'Find the 5th',
+          body: 'Stack another third on top. From the <b>3rd</b> (' + nm[1] + ') skip a letter (' + t[1].l +
+                ' → <span style="opacity:.55">' + midLetter2 + '</span> → ' + t[2].l +
+                ') and go up a <b>' + from3name + '</b> &mdash; <b>' + n5 + ' half-steps</b> &mdash; to the <b>5th</b>: <b>' +
+                nm[2] + '</b>. <span style="opacity:.7">(That is a Perfect 5th above the root either way.)</span>' },
+        { title: 'The Chord',
+          body: '<b>' + chordName + '</b> = <b>' + nm.join(' – ') + '</b>. Press <b>Hear it</b> to play all three together. ' +
+                'The root and 5th never change &mdash; ' +
+                (qual === 'major'
+                  ? 'to make it <b>minor</b>, lower the 3rd a half-step (<b>' + nm[1] + ' → ' + spellToString(spellChord(rootPc,[0,3,7])[1]) + '</b>).'
+                  : 'to make it <b>major</b>, raise the 3rd a half-step (<b>' + nm[1] + ' → ' + spellToString(spellChord(rootPc,[0,4,7])[1]) + '</b>).') }
+      ];
+      const s = steps[step];
+      stepNoEl.textContent = 'Step ' + (step + 1) + ' / 4';
+      stepTtlEl.textContent = s.title;
+      stepBdyEl.innerHTML = s.body;
+      backBtn.disabled = step === 0;
+      nextBtn.textContent = step === 3 ? 'Start over' : 'Next ›';
+      playBtn.textContent = step === 3 ? '▶ Hear the chord' : '▶ Hear it';
+    }
+
+    function tutTone(semi, delay){
+      playTone(48 + rootPc + semi, delay, 1.3, 0.16, 'triangle');
+    }
+    function play(){
+      const third = thirdSemi();
+      if(step === 0) tutTone(0, 0);
+      else if(step === 1){ tutTone(0, 0); tutTone(third, 0.30); }
+      else if(step === 2){ tutTone(0, 0); tutTone(third, 0.26); tutTone(7, 0.52); }
+      else intervalsFor().forEach((o)=> tutTone(o, 0));
+    }
+
+    let pausedForTutorial = false;
+    function openTutorial(){
+      step = 0; render();
+      if(sessionActive && !gameOver && !pausedForTutorial){ pauseTimer(); pausedForTutorial = true; }
+      overlay.classList.add('show');
+    }
+    function closeTutorial(){
+      overlay.classList.remove('show');
+      if(pausedForTutorial){ pausedForTutorial = false; resumeTimer(); }
+    }
+
+    qualsEl.addEventListener('click', (e)=>{
+      const b = e.target.closest('.tut-qual');
+      if(!b) return;
+      qual = b.dataset.q; step = 0; render();
+    });
+    backBtn.addEventListener('click', ()=>{ step = Math.max(0, step - 1); render(); });
+    nextBtn.addEventListener('click', ()=>{ step = step === 3 ? 0 : step + 1; render(); });
+    playBtn.addEventListener('click', play);
+    document.getElementById('tutorialCloseBtn').addEventListener('click', closeTutorial);
+    document.getElementById('tutorialBtn').addEventListener('click', openTutorial);
+    const gameBtn = document.getElementById('tutorialBtnGame');
+    if(gameBtn) gameBtn.addEventListener('click', openTutorial);
+
+    render();
+  })();
 
   // ---------- Mistake explanation modal ----------
   // Wrong answers now pause the round on a modal the student must actively
