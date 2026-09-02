@@ -287,27 +287,31 @@
     gap: 4px;
   }
   .key-slot.black{ justify-content:flex-end; }
+  /* answer keys -- real piano colours: white naturals, black accidentals */
   .key{
     font-family:'Share Tech Mono', monospace;
-    background: var(--panel);
-    color: var(--cream-dim);
-    border: 1px solid var(--panel-line);
-    border-radius: 6px;
+    background:#f4f1e7;
+    color:#3a362e;
+    border: 1px solid #a9a08c;
+    border-radius: 4px;
     text-align:center;
     cursor:pointer;
     transition: background 0.12s ease, color 0.12s ease, box-shadow 0.12s ease;
   }
   .key.natural{
     font-size: 14px;
-    padding: 22px 0 14px;
+    padding: 22px 0 12px;
+    box-shadow: inset 0 -7px 7px rgba(0,0,0,0.06);
   }
+  .key.natural:hover{ background:#ffffff; color:#1b1914; }
   .key.accidental{
     font-size: 11.5px;
     padding: 8px 0;
-    background: #E7DABB;
-    color: var(--cream-dim);
+    background:#232329;
+    color:#dcd8cb;
+    border-color:#000;
   }
-  .key:hover{ border-color: var(--brass-dim); color: var(--cream); }
+  .key.accidental:hover{ background:#3a3a44; color:#fff; }
   .key:focus-visible{ outline: 3px solid var(--screen-trace); outline-offset: 2px; }
   .key.selected{
     background: linear-gradient(180deg, var(--brass-fill-top), var(--brass-fill-bot));
@@ -316,19 +320,21 @@
     box-shadow: 0 0 14px rgba(240,201,104,0.5);
   }
   .key.reveal-correct{
-    background: transparent;
-    color: var(--led-green);
+    background:#e9f6e9;
+    color: #1f7a2e;
     border-color: var(--led-green);
     box-shadow: 0 0 10px var(--led-green-glow);
     font-weight:700;
   }
+  .key.accidental.reveal-correct{ background:#123018; color:#7fe08a; }
   .key.reveal-wrong{
-    background: transparent;
-    color: var(--led-red);
+    background:#fbeceb;
+    color: #b53125;
     border-color: var(--led-red);
     box-shadow: 0 0 10px var(--led-red-glow);
     text-decoration: line-through;
   }
+  .key.accidental.reveal-wrong{ background:#301414; color:#ff9a8f; }
 
   .control-row{
     display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:14px;
@@ -597,7 +603,7 @@
 
   /* ---- Step-by-step tutorial ---- */
   .howto-actions{ margin: -8px 0 18px; }
-  .tut-card{ max-width: 580px; }
+  .tut-card{ max-width: 620px; }
   .tut-pickrow{ display:flex; align-items:center; gap:10px; margin-bottom:9px; flex-wrap:wrap; }
   .tut-pick-label{
     font-family:'Oswald',sans-serif; font-size:10px; letter-spacing:.16em;
@@ -656,6 +662,116 @@
     .tut-cell{ font-size:9px; padding:15px 0 6px; }
     .tut-cell .tut-deg{ font-size:7px; }
   }
+
+  /* ---- Reusable black & white piano keyboard ---- */
+  .piano{
+    position:relative; width:100%; height:120px;
+    background:#0e0e12; border-radius:6px; padding:4px 0 0;
+    box-shadow: inset 0 -4px 8px rgba(0,0,0,.45), 0 2px 5px rgba(0,0,0,.3);
+    overflow:hidden; user-select:none; display:flex; align-items:stretch;
+  }
+  .pkey{ position:relative; padding:0; margin:0; border:none; cursor:pointer; font-family:inherit; box-sizing:border-box; }
+  .pkey.white{
+    flex:0 0 auto; height:100%; background:#f3efe4; border:1px solid #a9a08c;
+    border-radius:0 0 4px 4px; margin-right:-1px;
+    display:flex; align-items:flex-end; justify-content:center; padding-bottom:6px;
+    box-shadow: inset 0 -7px 7px rgba(0,0,0,.06);
+  }
+  .pkey.white:hover{ background:#fffdf6; }
+  .pkey.white:active{ background:#e4ddca; }
+  .pkey.black{
+    position:absolute; top:0; height:62%;
+    background:#1b1b21; border:1px solid #000;
+    border-radius:0 0 3px 3px; z-index:4;
+    box-shadow: 0 3px 4px rgba(0,0,0,.55);
+  }
+  .pkey.black:hover{ background:#35353f; }
+  .pkey.black:active{ background:#0b0b0f; }
+  .pk-lab{ font-family:'Share Tech Mono',monospace; font-size:10px; color:#8c8674; pointer-events:none; }
+  .pk-badge{
+    position:absolute; left:50%; transform:translateX(-50%); top:6px;
+    font-family:'Oswald',sans-serif; font-size:8.5px; letter-spacing:.02em;
+    padding:1px 3px; border-radius:3px; white-space:nowrap; pointer-events:none;
+    background:#3a3630; color:#fff;
+  }
+  .pkey.black .pk-badge{ top:4px; font-size:7.5px; padding:1px 2px; }
+  .pkey.white.hl-root{ background:#f0c968; }
+  .pkey.black.hl-root{ background:#bc8f34; }
+  .hl-root .pk-badge{ background:#6e5214; }
+  .pkey.white.hl-3rd{ background:#8fc2f0; }
+  .pkey.black.hl-3rd{ background:#3f79b8; }
+  .hl-3rd .pk-badge{ background:#245a8a; }
+  .pkey.white.hl-5th{ background:#93da9d; }
+  .pkey.black.hl-5th{ background:#3f9a52; }
+  .hl-5th .pk-badge{ background:#256f33; }
+  .pkey.white.hl-count{ box-shadow: inset 0 0 0 3px #d8a63c, inset 0 -7px 7px rgba(0,0,0,.06); }
+  .pkey.black.hl-count{ box-shadow: inset 0 0 0 2px #d8a63c; }
+  .hl-count .pk-badge{ background:#d8a63c; color:#1c1509; }
+
+  /* ---- Tutorial tabs + practice quiz ---- */
+  .tut-tabs{ display:flex; gap:6px; margin:2px 0 12px; }
+  .tut-tab{
+    flex:1; font-family:'Oswald',sans-serif; font-size:12px; letter-spacing:.08em;
+    text-transform:uppercase; padding:9px 6px; cursor:pointer;
+    background:transparent; color:var(--cream-dim);
+    border:1.5px solid var(--panel-line); border-radius:7px;
+  }
+  .tut-tab:hover{ border-color:var(--brass-dim); color:var(--cream); }
+  .tut-tab:focus-visible{ outline:2px solid var(--screen-trace); outline-offset:2px; }
+  .tut-tab.on{
+    background:linear-gradient(180deg,var(--brass-fill-top),var(--brass-fill-bot));
+    color:var(--ink); font-weight:700; border-color:transparent;
+  }
+  #tutPiano, #tutPracPiano{ margin:14px 0; }
+  .tut-prac-intro{ font-size:12.5px; color:var(--cream-dim); margin:0; }
+  .tut-prac-q{
+    background:var(--panel);
+    border:1px solid var(--panel-line);
+    border-left:5px solid var(--brass-bright);
+    border-radius:8px;
+    padding:14px 16px 15px;
+    margin:14px 0 12px;
+    box-shadow:0 2px 10px rgba(0,0,0,0.16);
+  }
+  .tut-prac-q .q-eyebrow{
+    display:block;
+    font-family:'Oswald',sans-serif; font-size:10px; font-weight:700;
+    letter-spacing:.18em; text-transform:uppercase; color:var(--brass-dim);
+    margin-bottom:6px;
+  }
+  .tut-prac-q .q-eyebrow .q-count{
+    color:var(--ink); background:var(--brass-bright);
+    padding:1px 6px; border-radius:20px; margin-left:6px; letter-spacing:.06em;
+  }
+  .tut-prac-q .q-text{
+    display:block;
+    font-family:'Oswald',sans-serif; font-size:17px; font-weight:600;
+    line-height:1.45; color:var(--cream);
+  }
+  .tut-prac-q .q-text b{ color:var(--brass-bright); }
+  .tut-prac-choices{ display:flex; gap:8px; flex-wrap:wrap; margin-bottom:8px; }
+  .tut-choice{
+    flex:1; min-width:120px;
+    font-family:'Oswald',sans-serif; font-size:14px; letter-spacing:.04em;
+    padding:13px 8px; cursor:pointer;
+    background:var(--panel); color:var(--cream);
+    border:1.5px solid var(--panel-line); border-radius:8px;
+  }
+  .tut-choice:hover:not(:disabled){ border-color:var(--brass-dim); }
+  .tut-choice:disabled{ cursor:default; opacity:.9; }
+  .tut-choice.right{ border-color:var(--led-green); color:var(--led-green); box-shadow:0 0 10px var(--led-green-glow); }
+  .tut-choice.wrong{ border-color:var(--led-red); color:var(--led-red); text-decoration:line-through; }
+  .tut-prac-fb{ font-size:13.5px; line-height:1.5; min-height:20px; margin:6px 0 12px; color:var(--cream-dim); }
+  .tut-prac-fb.good{ color:var(--led-green); }
+  .tut-prac-fb.bad{ color:var(--led-red); }
+
+  /* ---- In-game inline keyboard helper ---- */
+  .piano-helper{ margin:6px 0 4px; }
+  .piano-helper .pk-hint{
+    font-family:'Oswald',sans-serif; font-size:11px; letter-spacing:.03em;
+    color:var(--brass-dim); margin:6px 0 0; text-align:center;
+  }
+  .piano-helper .pk-hint b{ color:var(--brass-bright); }
 
   .armory-grid{
     display:grid;
@@ -853,10 +969,13 @@
 
       <div class="keyboard" id="keyboard"></div>
 
+      <div class="piano-helper" id="pianoHelper" hidden></div>
+
       <div class="control-row">
         <div class="action-buttons">
           <button class="btn" id="testBtn" type="button">Test My Chord</button>
           <button class="btn secondary" id="clearBtn" type="button">Clear</button>
+          <button class="btn secondary" id="pianoBtn" type="button">&#127929; Keys</button>
           <button class="btn secondary" id="formulaBtn" type="button">Formulas</button>
           <button class="btn secondary" id="tutorialBtnGame" type="button">&#128218; Learn</button>
         </div>
@@ -925,41 +1044,61 @@
   <div class="armory-card tut-card">
     <div class="armory-head">
       <div>
-        <h2>Build a Chord &mdash; Step by Step</h2>
-        <div class="armory-sub">Major &amp; minor triads, from the root up</div>
+        <h2>Chord Workshop</h2>
+        <div class="armory-sub">Major &amp; minor triads &mdash; the two thirds inside them</div>
       </div>
       <button class="btn secondary" id="tutorialCloseBtn" type="button">Close</button>
     </div>
 
-    <div class="tut-pickrow">
-      <span class="tut-pick-label">Root</span>
-      <div class="tut-roots" id="tutRoots"></div>
+    <div class="tut-tabs">
+      <button class="tut-tab on" data-tab="learn" type="button">Learn</button>
+      <button class="tut-tab" data-tab="practice" type="button">Practice</button>
     </div>
-    <div class="tut-pickrow">
-      <span class="tut-pick-label">Quality</span>
-      <div class="tut-roots" id="tutQuals">
-        <button class="tut-qual on" data-q="major" type="button">Major</button>
-        <button class="tut-qual" data-q="minor" type="button">Minor</button>
+
+    <div id="tutLearn">
+      <div class="tut-pickrow">
+        <span class="tut-pick-label">Root</span>
+        <div class="tut-roots" id="tutRoots"></div>
       </div>
-    </div>
-
-    <div class="tut-strip" id="tutStrip"></div>
-
-    <div class="tut-step">
-      <div class="tut-step-head">
-        <span class="tut-step-no" id="tutStepNo">Step 1 / 4</span>
-        <span class="tut-step-title" id="tutStepTitle">The Root</span>
+      <div class="tut-pickrow">
+        <span class="tut-pick-label">Quality</span>
+        <div class="tut-roots" id="tutQuals">
+          <button class="tut-qual on" data-q="major" type="button">Major</button>
+          <button class="tut-qual" data-q="minor" type="button">Minor</button>
+        </div>
       </div>
-      <p class="tut-step-body" id="tutStepBody"></p>
+
+      <div id="tutPiano"></div>
+
+      <div class="tut-step">
+        <div class="tut-step-head">
+          <span class="tut-step-no" id="tutStepNo">Step 1 / 4</span>
+          <span class="tut-step-title" id="tutStepTitle">The Root</span>
+        </div>
+        <p class="tut-step-body" id="tutStepBody"></p>
+      </div>
+
+      <div class="tut-foot">
+        <button class="btn secondary" id="tutBack" type="button">&lsaquo; Back</button>
+        <button class="btn secondary" id="tutPlay" type="button">&#9654; Hear it</button>
+        <button class="btn" id="tutNext" type="button">Next &rsaquo;</button>
+      </div>
+
+      <p class="tut-cheat">Major triad = major 3rd + minor 3rd &nbsp;&middot;&nbsp; minor triad = minor 3rd + major 3rd</p>
     </div>
 
-    <div class="tut-foot">
-      <button class="btn secondary" id="tutBack" type="button">&lsaquo; Back</button>
-      <button class="btn secondary" id="tutPlay" type="button">&#9654; Hear it</button>
-      <button class="btn" id="tutNext" type="button">Next &rsaquo;</button>
+    <div id="tutPractice" hidden>
+      <p class="tut-prac-intro">A triad is shown on the keyboard &amp; played. Name the lower third, the upper third, then the triad.</p>
+      <div id="tutPracPiano"></div>
+      <div class="tut-prac-q" id="tutPracQ"></div>
+      <div class="tut-prac-choices" id="tutPracChoices"></div>
+      <p class="tut-prac-fb" id="tutPracFb"></p>
+      <div class="tut-foot">
+        <button class="btn secondary" id="tutPracHear" type="button">&#9654; Hear it</button>
+        <button class="btn" id="tutPracNext" type="button">Next &rsaquo;</button>
+      </div>
+      <p class="tut-cheat"><span id="tutPracScore">0 / 0</span> correct &nbsp;&middot;&nbsp; major 3rd = 4 half-steps, minor 3rd = 3</p>
     </div>
-
-    <p class="tut-cheat">Major 3rd = 4 half-steps &middot; minor 3rd = 3 &middot; Perfect 5th = 7 (both)</p>
   </div>
 </div>
 
@@ -3467,23 +3606,91 @@
     }
   }
 
-  // ---------- Step-by-step tutorial (major & minor triads) ----------
+  // ---------- Reusable black & white piano keyboard ----------
+  const PIANO_WHITE_PC = { 0:'C', 2:'D', 4:'E', 5:'F', 7:'G', 9:'A', 11:'B' };
+  function isBlackSemi(s){ const m = ((s % 12) + 12) % 12; return m===1||m===3||m===6||m===8||m===10; }
+
+  // mount: element to fill.  opts:
+  //   semis  - semitones to draw, from C (default 25 = two octaves)
+  //   labels - show C D E ... on the white keys
+  //   marks  - { <semitoneIndex>: { role:'root'|'3rd'|'5th'|'count', badge:'text' } }
+  //   onNote - fn(semitoneIndex) on click (keys are inert when omitted)
+  function renderPiano(mount, opts){
+    if(!mount) return;
+    opts = opts || {};
+    const semis = opts.semis || 25;
+    const marks = opts.marks || {};
+    mount.innerHTML = '';
+    const wrap = document.createElement('div');
+    wrap.className = 'piano';
+
+    const whites = [];
+    for(let s = 0; s < semis; s++) if(!isBlackSemi(s)) whites.push(s);
+    const nW = whites.length;
+
+    function decorate(btn, s){
+      const mk = marks[s];
+      if(mk){
+        if(mk.role) btn.classList.add('hl-' + mk.role);
+        if(mk.badge){
+          const b = document.createElement('span');
+          b.className = 'pk-badge';
+          b.textContent = mk.badge;
+          btn.appendChild(b);
+        }
+      }
+      if(opts.onNote){ btn.addEventListener('click', ()=> opts.onNote(s)); }
+      else { btn.tabIndex = -1; }
+    }
+
+    whites.forEach((s)=>{
+      const k = document.createElement('button');
+      k.type = 'button';
+      k.className = 'pkey white';
+      k.style.width = (100 / nW) + '%';
+      if(opts.labels && PIANO_WHITE_PC[s % 12]){
+        const l = document.createElement('span');
+        l.className = 'pk-lab';
+        l.textContent = PIANO_WHITE_PC[s % 12];
+        k.appendChild(l);
+      }
+      decorate(k, s);
+      wrap.appendChild(k);
+    });
+
+    for(let s = 0; s < semis; s++){
+      if(!isBlackSemi(s)) continue;
+      const wiBelow = whites.indexOf(s - 1);   // white key immediately to the left
+      const k = document.createElement('button');
+      k.type = 'button';
+      k.className = 'pkey black';
+      k.style.width = ((100 / nW) * 0.62) + '%';
+      k.style.left = ((wiBelow + 1) * (100 / nW)) + '%';
+      k.style.marginLeft = '-' + ((100 / nW) * 0.31) + '%';
+      decorate(k, s);
+      wrap.appendChild(k);
+    }
+
+    mount.appendChild(wrap);
+  }
+
+  // ---------- Chord Workshop: learn + practice (major & minor triads) ----------
   (function(){
     const overlay = document.getElementById('tutorialOverlay');
     if(!overlay) return;
     const rootsEl   = document.getElementById('tutRoots');
     const qualsEl   = document.getElementById('tutQuals');
-    const stripEl   = document.getElementById('tutStrip');
+    const pianoEl   = document.getElementById('tutPiano');
     const stepNoEl  = document.getElementById('tutStepNo');
     const stepTtlEl = document.getElementById('tutStepTitle');
     const stepBdyEl = document.getElementById('tutStepBody');
     const backBtn   = document.getElementById('tutBack');
     const nextBtn   = document.getElementById('tutNext');
     const playBtn   = document.getElementById('tutPlay');
+    const learnPane = document.getElementById('tutLearn');
+    const pracPane  = document.getElementById('tutPractice');
 
-    const BLACK_PC = { 1:1, 3:1, 6:1, 8:1, 10:1 };
     let rootPc = 0, qual = 'major', step = 0;
-
     const intervalsFor = ()=> qual === 'major' ? [0,4,7] : [0,3,7];
     const thirdSemi = ()=> qual === 'major' ? 4 : 3;
     const tones = ()=> spellChord(rootPc, intervalsFor());
@@ -3500,74 +3707,52 @@
       }
     }
 
-    function buildStrip(){
-      stripEl.innerHTML = '';
-      const t = tones();
-      const third = thirdSemi();
-      for(let off = 0; off <= 12; off++){
-        const abs = (rootPc + off) % 12;
-        const cell = document.createElement('div');
-        cell.className = 'tut-cell' + (BLACK_PC[abs] ? ' black' : '');
-        const deg = document.createElement('span');
-        deg.className = 'tut-deg';
-        const nm = document.createElement('span');
-        cell.appendChild(deg); cell.appendChild(nm);
-
-        let name = rootLabel(abs);
-        if(off === 0) name = spellToString(t[0]);
-        else if(off === third && step >= 1) name = spellToString(t[1]);
-        else if(off === 7 && step >= 2) name = spellToString(t[2]);
-        else if(off === 12) name = spellToString(t[0]);
-        nm.textContent = name;
-
-        // permanent tone markers, revealed as the steps progress
-        if(off === 0){ cell.classList.add('tone-root'); deg.textContent = 'ROOT'; }
-        if(step >= 1 && off === third){ cell.classList.add('tone-3rd'); deg.textContent = '3rd'; }
-        if(step >= 2 && off === 7){ cell.classList.add('tone-5th'); deg.textContent = '5th'; }
-        // half-step counters for the step being taught
-        if(step === 1 && off >= 1 && off < third){ cell.classList.add('count'); deg.textContent = String(off); }
-        if(step === 2 && off > third && off < 7){ cell.classList.add('count'); deg.textContent = String(off - third); }
-        stripEl.appendChild(cell);
-      }
+    function learnMarks(){
+      const third = thirdSemi(), t = tones(), m = {};
+      m[rootPc] = { role:'root', badge: spellToString(t[0]) };
+      if(step >= 1) m[rootPc + third] = { role:'3rd', badge: spellToString(t[1]) };
+      if(step >= 2) m[rootPc + 7] = { role:'5th', badge: spellToString(t[2]) };
+      if(step === 1) for(let k = 1; k < third; k++) m[rootPc + k] = { role:'count', badge: String(k) };
+      if(step === 2) for(let k = third + 1; k < 7; k++) m[rootPc + k] = { role:'count', badge: String(k - third) };
+      return m;
     }
 
     function render(){
       buildRoots();
-      Array.prototype.forEach.call(qualsEl.children, (b)=>{
-        b.classList.toggle('on', b.dataset.q === qual);
+      Array.prototype.forEach.call(qualsEl.children, (b)=> b.classList.toggle('on', b.dataset.q === qual));
+      renderPiano(pianoEl, {
+        semis: 19, labels: true, marks: learnMarks(),
+        onNote: (s)=> playTone(48 + s, 0, 1.2, 0.16, 'triangle')
       });
-      buildStrip();
 
       const t = tones();
       const nm = t.map(spellToString);
-      const rootLetter = t[0].l;
-      const midLetter = LETTERS[(LETTERS.indexOf(rootLetter) + 1) % 7];
+      const midLetter  = LETTERS[(LETTERS.indexOf(t[0].l) + 1) % 7];
       const midLetter2 = LETTERS[(LETTERS.indexOf(t[1].l) + 1) % 7];
       const thirdName = qual === 'major' ? 'major 3rd' : 'minor 3rd';
-      const n3 = String(thirdSemi());
       const from3name = qual === 'major' ? 'minor 3rd' : 'major 3rd';
+      const n3 = String(thirdSemi());
       const n5 = String(7 - thirdSemi());
-      const chordName = nm[0] + ' ' + qual;
 
       const steps = [
         { title: 'The Root',
           body: 'Every chord is measured from its <b>root</b>. Here the root is <b>' + nm[0] +
-                '</b>. Find it on the keyboard &mdash; every other note is counted up from this one.' },
+                '</b> (gold key). Every other note is counted up from it.' },
         { title: 'Find the 3rd',
-          body: 'Skip the next letter name (' + rootLetter + ' → <span style="opacity:.55">' + midLetter +
-                '</span> → ' + t[1].l + ') to reach the <b>3rd</b>. Make it a <b>' + thirdName +
-                '</b>: count <b>' + n3 + ' half-steps</b> up from the root. You land on <b>' + nm[1] + '</b>.' },
+          body: 'Skip a letter name (' + t[0].l + ' &rarr; <span style="opacity:.55">' + midLetter +
+                '</span> &rarr; ' + t[1].l + ') to land on the <b>3rd</b>. Make it a <b>' + thirdName +
+                '</b>: count <b>' + n3 + ' half-steps</b> up from the root &mdash; the numbered keys &mdash; to <b>' + nm[1] + '</b>.' },
         { title: 'Find the 5th',
-          body: 'Stack another third on top. From the <b>3rd</b> (' + nm[1] + ') skip a letter (' + t[1].l +
-                ' → <span style="opacity:.55">' + midLetter2 + '</span> → ' + t[2].l +
-                ') and go up a <b>' + from3name + '</b> &mdash; <b>' + n5 + ' half-steps</b> &mdash; to the <b>5th</b>: <b>' +
-                nm[2] + '</b>. <span style="opacity:.7">(That is a Perfect 5th above the root either way.)</span>' },
+          body: 'Stack a second third on top. From the <b>3rd</b> (' + nm[1] + ') skip a letter (' + t[1].l +
+                ' &rarr; <span style="opacity:.55">' + midLetter2 + '</span> &rarr; ' + t[2].l +
+                ') and go up a <b>' + from3name + '</b> &mdash; <b>' + n5 + ' half-steps</b> &mdash; to the <b>5th</b>: <b>' + nm[2] +
+                '</b>. <span style="opacity:.7">(A Perfect 5th above the root, always.)</span>' },
         { title: 'The Chord',
-          body: '<b>' + chordName + '</b> = <b>' + nm.join(' – ') + '</b>. Press <b>Hear it</b> to play all three together. ' +
-                'The root and 5th never change &mdash; ' +
+          body: '<b>' + nm[0] + ' ' + qual + '</b> = <b>' + nm.join(' &ndash; ') + '</b> &mdash; a <b>' + thirdName +
+                '</b> then a <b>' + from3name + '</b> stacked up. ' +
                 (qual === 'major'
-                  ? 'to make it <b>minor</b>, lower the 3rd a half-step (<b>' + nm[1] + ' → ' + spellToString(spellChord(rootPc,[0,3,7])[1]) + '</b>).'
-                  : 'to make it <b>major</b>, raise the 3rd a half-step (<b>' + nm[1] + ' → ' + spellToString(spellChord(rootPc,[0,4,7])[1]) + '</b>).') }
+                  ? 'Lower the 3rd one half-step (<b>' + nm[1] + ' &rarr; ' + spellToString(spellChord(rootPc,[0,3,7])[1]) + '</b>) and it becomes <b>minor</b>.'
+                  : 'Raise the 3rd one half-step (<b>' + nm[1] + ' &rarr; ' + spellToString(spellChord(rootPc,[0,4,7])[1]) + '</b>) and it becomes <b>major</b>.') }
       ];
       const s = steps[step];
       stepNoEl.textContent = 'Step ' + (step + 1) + ' / 4';
@@ -3578,26 +3763,13 @@
       playBtn.textContent = step === 3 ? '▶ Hear the chord' : '▶ Hear it';
     }
 
-    function tutTone(semi, delay){
-      playTone(48 + rootPc + semi, delay, 1.3, 0.16, 'triangle');
-    }
     function play(){
       const third = thirdSemi();
-      if(step === 0) tutTone(0, 0);
-      else if(step === 1){ tutTone(0, 0); tutTone(third, 0.30); }
-      else if(step === 2){ tutTone(0, 0); tutTone(third, 0.26); tutTone(7, 0.52); }
-      else intervalsFor().forEach((o)=> tutTone(o, 0));
-    }
-
-    let pausedForTutorial = false;
-    function openTutorial(){
-      step = 0; render();
-      if(sessionActive && !gameOver && !pausedForTutorial){ pauseTimer(); pausedForTutorial = true; }
-      overlay.classList.add('show');
-    }
-    function closeTutorial(){
-      overlay.classList.remove('show');
-      if(pausedForTutorial){ pausedForTutorial = false; resumeTimer(); }
+      const t = (semi, d)=> playTone(48 + rootPc + semi, d, 1.3, 0.16, 'triangle');
+      if(step === 0) t(0, 0);
+      else if(step === 1){ t(0, 0); t(third, 0.30); }
+      else if(step === 2){ t(0, 0); t(third, 0.26); t(7, 0.52); }
+      else intervalsFor().forEach((o)=> t(o, 0));
     }
 
     qualsEl.addEventListener('click', (e)=>{
@@ -3608,6 +3780,125 @@
     backBtn.addEventListener('click', ()=>{ step = Math.max(0, step - 1); render(); });
     nextBtn.addEventListener('click', ()=>{ step = step === 3 ? 0 : step + 1; render(); });
     playBtn.addEventListener('click', play);
+
+    // ---- Practice tab: identify the two thirds ----
+    const pracPianoEl  = document.getElementById('tutPracPiano');
+    const pracQEl      = document.getElementById('tutPracQ');
+    const pracChoiceEl = document.getElementById('tutPracChoices');
+    const pracFbEl     = document.getElementById('tutPracFb');
+    const pracScoreEl  = document.getElementById('tutPracScore');
+    const pracHearBtn  = document.getElementById('tutPracHear');
+    const pracNextBtn  = document.getElementById('tutPracNext');
+
+    const CLEAN_ROOTS = [];
+    for(let pc = 0; pc < 12; pc++){
+      if(isSupportedChord(spellChord(pc, [0,4,7])) && isSupportedChord(spellChord(pc, [0,3,7]))) CLEAN_ROOTS.push(pc);
+    }
+    let pRoot = 0, pQual = 'major', pPhase = 0, pAnswered = false, pScore = 0, pAttempts = 0, pStarted = false;
+    const pracTones = ()=> spellChord(pRoot, pQual === 'major' ? [0,4,7] : [0,3,7]);
+
+    function pracQuestions(){
+      const nm = pracTones().map(spellToString);
+      return [
+        { q: 'The <b>lower</b> third &mdash; root <b>' + nm[0] + '</b> up to <b>' + nm[1] + '</b> &mdash; is a&hellip;',
+          opts: ['Major 3rd', 'Minor 3rd'], correct: pQual === 'major' ? 0 : 1,
+          why: nm[0] + ' to ' + nm[1] + ' is ' + (pQual === 'major' ? '4 half-steps = a major 3rd.' : '3 half-steps = a minor 3rd.') },
+        { q: 'The <b>upper</b> third &mdash; <b>' + nm[1] + '</b> up to the 5th <b>' + nm[2] + '</b> &mdash; is a&hellip;',
+          opts: ['Major 3rd', 'Minor 3rd'], correct: pQual === 'major' ? 1 : 0,
+          why: nm[1] + ' to ' + nm[2] + ' is ' + (pQual === 'major' ? '3 half-steps = a minor 3rd.' : '4 half-steps = a major 3rd.') },
+        { q: (pQual === 'major' ? 'Major' : 'Minor') + ' 3rd on the bottom, ' + (pQual === 'major' ? 'minor' : 'major') +
+             ' 3rd on top &mdash; so this triad is&hellip;',
+          opts: ['Major', 'Minor'], correct: pQual === 'major' ? 0 : 1,
+          why: nm[0] + ' ' + pQual + ' = ' + nm.join(' – ') + '.' }
+      ];
+    }
+
+    function newTriad(){
+      pRoot = CLEAN_ROOTS[Math.floor(Math.random() * CLEAN_ROOTS.length)];
+      pQual = Math.random() < 0.5 ? 'major' : 'minor';
+      pPhase = 0; pAnswered = false;
+      renderPractice();
+    }
+
+    function renderPractice(){
+      const nm = pracTones().map(spellToString);
+      const third = pQual === 'major' ? 4 : 3;
+      const marks = {};
+      marks[pRoot] = { role:'root', badge: nm[0] };
+      marks[pRoot + third] = { role:'3rd', badge: nm[1] };
+      marks[pRoot + 7] = { role:'5th', badge: nm[2] };
+      renderPiano(pracPianoEl, {
+        semis: 19, labels: true, marks: marks,
+        onNote: (s)=> playTone(48 + s, 0, 1.15, 0.16, 'triangle')
+      });
+      pracScoreEl.textContent = pScore + ' / ' + pAttempts;
+
+      const cur = pracQuestions()[pPhase];
+      pracQEl.innerHTML =
+        '<span class="q-eyebrow">Question<span class="q-count">' + (pPhase + 1) + ' / 3</span></span>' +
+        '<span class="q-text">' + cur.q + '</span>';
+      pracChoiceEl.innerHTML = '';
+      cur.opts.forEach((label, i)=>{
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'tut-choice';
+        b.textContent = label;
+        b.addEventListener('click', ()=> answer(i, cur));
+        pracChoiceEl.appendChild(b);
+      });
+      pracFbEl.textContent = '';
+      pracFbEl.className = 'tut-prac-fb';
+      pAnswered = false;
+      pracNextBtn.textContent = 'Skip ›';
+    }
+
+    function answer(i, cur){
+      if(pAnswered) return;
+      pAnswered = true;
+      pAttempts++;
+      const right = i === cur.correct;
+      if(right) pScore++;
+      Array.prototype.forEach.call(pracChoiceEl.children, (b, idx)=>{
+        b.disabled = true;
+        if(idx === cur.correct) b.classList.add('right');
+        else if(idx === i) b.classList.add('wrong');
+      });
+      pracFbEl.textContent = (right ? '✓ ' : '✗ ') + cur.why;
+      pracFbEl.className = 'tut-prac-fb ' + (right ? 'good' : 'bad');
+      pracScoreEl.textContent = pScore + ' / ' + pAttempts;
+      pracNextBtn.textContent = pPhase < 2 ? 'Next ›' : 'New triad ›';
+    }
+
+    pracNextBtn.addEventListener('click', ()=>{
+      if(pPhase < 2){ pPhase++; renderPractice(); }
+      else newTriad();
+    });
+    pracHearBtn.addEventListener('click', ()=>{
+      (pQual === 'major' ? [0,4,7] : [0,3,7]).forEach((o)=> playTone(48 + pRoot + o, 0, 1.4, 0.16, 'triangle'));
+    });
+
+    // ---- tabs ----
+    function switchTab(name){
+      Array.prototype.forEach.call(overlay.querySelectorAll('.tut-tab'), (t)=> t.classList.toggle('on', t.dataset.tab === name));
+      learnPane.hidden = name !== 'learn';
+      pracPane.hidden  = name !== 'practice';
+      if(name === 'practice' && !pStarted){ pStarted = true; newTriad(); }
+    }
+    Array.prototype.forEach.call(overlay.querySelectorAll('.tut-tab'), (t)=>{
+      t.addEventListener('click', ()=> switchTab(t.dataset.tab));
+    });
+
+    // ---- open / close (pauses the session timer while open) ----
+    let pausedForTutorial = false;
+    function openTutorial(){
+      switchTab('learn'); step = 0; render();
+      if(sessionActive && !gameOver && !pausedForTutorial){ pauseTimer(); pausedForTutorial = true; }
+      overlay.classList.add('show');
+    }
+    function closeTutorial(){
+      overlay.classList.remove('show');
+      if(pausedForTutorial){ pausedForTutorial = false; resumeTimer(); }
+    }
     document.getElementById('tutorialCloseBtn').addEventListener('click', closeTutorial);
     document.getElementById('tutorialBtn').addEventListener('click', openTutorial);
     const gameBtn = document.getElementById('tutorialBtnGame');
@@ -3615,6 +3906,38 @@
 
     render();
   })();
+
+  // ---------- In-game inline keyboard helper ----------
+  const pianoHelperBtn = document.getElementById('pianoBtn');
+  const pianoHelperBox = document.getElementById('pianoHelper');
+  function drawPianoHelper(){
+    if(!pianoHelperBox) return;
+    pianoHelperBox.innerHTML = '';
+    const root = currentRoundData ? currentRoundData.root : null;
+    const marks = {};
+    if(root != null) marks[root] = { role:'root', badge:'R' };
+    renderPiano(pianoHelperBox, {
+      semis: 25, labels: true, marks: marks,
+      onNote: (s)=> playTone(48 + s, 0, 1.15, 0.16, 'triangle')
+    });
+    const hint = document.createElement('p');
+    hint.className = 'pk-hint';
+    hint.innerHTML = root != null
+      ? 'Root of this chord: <b>' + rootLabel(root) + '</b> (gold). Count half-steps up from there. Tap keys to hear them.'
+      : 'Tap a key to hear its pitch.';
+    pianoHelperBox.appendChild(hint);
+  }
+  function syncPianoHelper(){
+    if(pianoHelperBox && !pianoHelperBox.hidden) drawPianoHelper();
+  }
+  if(pianoHelperBtn && pianoHelperBox){
+    pianoHelperBtn.addEventListener('click', ()=>{
+      const willShow = pianoHelperBox.hidden;
+      pianoHelperBox.hidden = !willShow;
+      pianoHelperBtn.innerHTML = willShow ? '🎹 Hide keys' : '🎹 Keys';
+      if(willShow) drawPianoHelper();
+    });
+  }
 
   // ---------- Mistake explanation modal ----------
   // Wrong answers now pause the round on a modal the student must actively
@@ -3823,6 +4146,7 @@
     });
     setFeedback('', '');
     roundLocked = false;
+    syncPianoHelper();
   }
 
   function testChord(){
@@ -4077,6 +4401,8 @@
       el.classList.remove('selected','reveal-correct','reveal-wrong');
     });
     selected.clear();
+    if(pianoHelperBox){ pianoHelperBox.hidden = true; }
+    if(pianoHelperBtn){ pianoHelperBtn.innerHTML = '🎹 Keys'; }
   }
 
   // ---------- Wire up ----------
